@@ -119,6 +119,8 @@ export interface TranslationDict {
   titleLanguage: string;
   ariaSound: string;
   titleSound: string;
+  ariaTheme: string;
+  titleTheme: string;
 
   statMoves: string;
   statIdeal: string;
@@ -183,6 +185,9 @@ export interface TranslationDict {
   settingsModalTitle: string;
   settingsModalSubtitle: string;
   settingsSectionVisual: string;
+  settingsThemeLabel: string;
+  settingsThemeDark: string;
+  settingsThemeLight: string;
   settingsSectionGameplay: string;
   settingsSectionAudio: string;
   settingsSectionData: string;
@@ -246,6 +251,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: 'Language',
     ariaSound: 'Toggle sound',
     titleSound: 'Mute / Sound',
+    ariaTheme: 'Toggle Night / Day mode',
+    titleTheme: 'Night / Day Mode',
 
     statMoves: 'Moves',
     statIdeal: 'Ideal',
@@ -311,6 +318,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: 'Settings',
     settingsModalSubtitle: 'Choose how to distinguish liquids inside the tubes.',
     settingsSectionVisual: 'Accessibility & Visuals',
+    settingsThemeLabel: 'Theme',
+    settingsThemeDark: 'Night Mode',
+    settingsThemeLight: 'Day Mode',
     settingsSectionGameplay: 'Gameplay',
     settingsSectionAudio: 'Audio',
     settingsSectionData: 'Game Data',
@@ -452,6 +462,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: 'Idioma',
     ariaSound: 'Alternar som',
     titleSound: 'Mudo / Som',
+    ariaTheme: 'Alternar Modo Noite / Dia',
+    titleTheme: 'Modo Noite / Dia',
 
     statMoves: 'Jogadas',
     statIdeal: 'Ideal',
@@ -517,6 +529,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: 'Configurações',
     settingsModalSubtitle: 'Escolha como diferenciar os líquidos nos tubos.',
     settingsSectionVisual: 'Acessibilidade e Visual',
+    settingsThemeLabel: 'Aparência',
+    settingsThemeDark: 'Modo Noite',
+    settingsThemeLight: 'Modo Dia',
     settingsSectionGameplay: 'Jogabilidade',
     settingsSectionAudio: 'Áudio',
     settingsSectionData: 'Dados do Jogo',
@@ -658,6 +673,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: 'Idioma',
     ariaSound: 'Alternar sonido',
     titleSound: 'Silencio / Sonido',
+    ariaTheme: 'Alternar Modo Noche / Día',
+    titleTheme: 'Modo Noche / Día',
 
     statMoves: 'Jugadas',
     statIdeal: 'Ideal',
@@ -723,6 +740,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: 'Configuración',
     settingsModalSubtitle: 'Elige cómo diferenciar los líquidos en los tubos.',
     settingsSectionVisual: 'Accesibilidad y Visual',
+    settingsThemeLabel: 'Apariencia',
+    settingsThemeDark: 'Modo Noche',
+    settingsThemeLight: 'Modo Día',
     settingsSectionGameplay: 'Jugabilidad',
     settingsSectionAudio: 'Audio',
     settingsSectionData: 'Datos del Juego',
@@ -864,6 +884,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: '语言',
     ariaSound: '切换声音',
     titleSound: '静音 / 声音',
+    ariaTheme: '切换夜间 / 日间模式',
+    titleTheme: '夜间 / 日间模式',
 
     statMoves: '步数',
     statIdeal: '最佳',
@@ -929,6 +951,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: '设置',
     settingsModalSubtitle: '选择试管中液体的区分方式。',
     settingsSectionVisual: '无障碍与视觉',
+    settingsThemeLabel: '主题外观',
+    settingsThemeDark: '夜间模式',
+    settingsThemeLight: '日间模式',
     settingsSectionGameplay: '游戏玩法',
     settingsSectionAudio: '音频',
     settingsSectionData: '游戏数据',
@@ -1070,6 +1095,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: 'भाषा',
     ariaSound: 'ध्वनि बदलें',
     titleSound: 'म्यूट / ध्वनि',
+    ariaTheme: 'नाइट / डे मोड बदलें',
+    titleTheme: 'नाइट / डे मोड',
 
     statMoves: 'चालें',
     statIdeal: 'आदर्श',
@@ -1135,6 +1162,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: 'सेटिंग्स',
     settingsModalSubtitle: 'ट्यूबों में तरल को अलग पहचानने का तरीका चुनें।',
     settingsSectionVisual: 'सुगम्यता और दृश्य',
+    settingsThemeLabel: 'थीम',
+    settingsThemeDark: 'नाइट मोड',
+    settingsThemeLight: 'डे मोड',
     settingsSectionGameplay: 'गेमप्ले',
     settingsSectionAudio: 'ऑडियो',
     settingsSectionData: 'गेम डेटा',
@@ -1276,6 +1306,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: 'اللغة',
     ariaSound: 'تبديل الصوت',
     titleSound: 'كتم / صوت',
+    ariaTheme: 'تبديل الوضع الليلي / النهاري',
+    titleTheme: 'الوضع الليلي / النهاري',
 
     statMoves: 'الحركات',
     statIdeal: 'المثالي',
@@ -1341,6 +1373,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: 'الإعدادات',
     settingsModalSubtitle: 'اختر طريقة تمييز السوائل داخل الأنابيب.',
     settingsSectionVisual: 'إمكانية الوصول والمظهر',
+    settingsThemeLabel: 'المظهر',
+    settingsThemeDark: 'الوضع الليلي',
+    settingsThemeLight: 'الوضع النهاري',
     settingsSectionGameplay: 'أسلوب اللعب',
     settingsSectionAudio: 'الصوت',
     settingsSectionData: 'بيانات اللعبة',
@@ -1482,6 +1517,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: 'Langue',
     ariaSound: 'Activer ou couper le son',
     titleSound: 'Muet / Son',
+    ariaTheme: 'Basculer Mode Nuit / Jour',
+    titleTheme: 'Mode Nuit / Jour',
 
     statMoves: 'Coups',
     statIdeal: 'Idéal',
@@ -1547,6 +1584,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: 'Paramètres',
     settingsModalSubtitle: 'Choisissez comment différencier les liquides dans les tubes.',
     settingsSectionVisual: 'Accessibilité et Visuel',
+    settingsThemeLabel: 'Apparence',
+    settingsThemeDark: 'Mode Nuit',
+    settingsThemeLight: 'Mode Jour',
     settingsSectionGameplay: 'Jouabilité',
     settingsSectionAudio: 'Audio',
     settingsSectionData: 'Données du Jeu',
@@ -1688,6 +1728,8 @@ export const I18N: Record<LangCode, TranslationDict> = {
     titleLanguage: 'Язык',
     ariaSound: 'Включить или выключить звук',
     titleSound: 'Звук / Без звука',
+    ariaTheme: 'Переключить ночной / дневной режим',
+    titleTheme: 'Ночной / Дневной режим',
 
     statMoves: 'Ходы',
     statIdeal: 'Идеал',
@@ -1753,6 +1795,9 @@ export const I18N: Record<LangCode, TranslationDict> = {
     settingsModalTitle: 'Настройки',
     settingsModalSubtitle: 'Выберите способ различения жидкостей в пробирках.',
     settingsSectionVisual: 'Доступность и Визуал',
+    settingsThemeLabel: 'Тема',
+    settingsThemeDark: 'Ночная',
+    settingsThemeLight: 'Дневная',
     settingsSectionGameplay: 'Игровой процесс',
     settingsSectionAudio: 'Аудио',
     settingsSectionData: 'Данные игры',

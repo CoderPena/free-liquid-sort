@@ -71,6 +71,49 @@ export default function App() {
               </button>
 
               <button
+                id="btn-theme"
+                className="icon-btn"
+                aria-label="Alternar Modo Noite / Dia"
+                title="Modo Noite / Dia"
+              >
+                <svg
+                  id="icon-theme-moon"
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <svg
+                  id="icon-theme-sun"
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ display: 'none' }}
+                >
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 20v2"></path>
+                  <path d="m4.93 4.93 1.41 1.41"></path>
+                  <path d="m17.66 17.66 1.41 1.41"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="m6.34 17.66-1.41 1.41"></path>
+                  <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+              </button>
+
+              <button
                 id="btn-settings"
                 className="icon-btn"
                 aria-label="Configurações"
@@ -427,6 +470,45 @@ export default function App() {
 
                 {/* Subpanel: Visual & Accessibility */}
                 <div className="settings-subpanel" data-subpanel="visual">
+                  <div className="setting-theme-row">
+                    <span id="settings-theme-label" className="setting-toggle-label" data-i18n="settingsThemeLabel">
+                      Aparência
+                    </span>
+                    <div className="theme-segmented" role="radiogroup" aria-labelledby="settings-theme-label">
+                      <button
+                        id="btn-theme-dark"
+                        type="button"
+                        className="theme-opt-btn active"
+                        role="radio"
+                        aria-checked="true"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <span data-i18n="settingsThemeDark">Modo Noite</span>
+                      </button>
+                      <button
+                        id="btn-theme-light"
+                        type="button"
+                        className="theme-opt-btn"
+                        role="radio"
+                        aria-checked="false"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="4"></circle>
+                          <path d="M12 2v2"></path>
+                          <path d="M12 20v2"></path>
+                          <path d="m4.93 4.93 1.41 1.41"></path>
+                          <path d="m17.66 17.66 1.41 1.41"></path>
+                          <path d="M2 12h2"></path>
+                          <path d="M20 12h2"></path>
+                          <path d="m6.34 17.66-1.41 1.41"></path>
+                          <path d="m19.07 4.93-1.41 1.41"></path>
+                        </svg>
+                        <span data-i18n="settingsThemeLight">Modo Dia</span>
+                      </button>
+                    </div>
+                  </div>
                   <p className="modal-subtitle settings-sub-desc" data-i18n="settingsModalSubtitle">
                     Escolha como diferenciar os líquidos nos tubos.
                   </p>

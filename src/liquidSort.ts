@@ -61,6 +61,7 @@ interface PhaseData {
 }
 
 type VisualMode = 'color' | 'pattern' | 'both';
+type ThemeMode = 'dark' | 'light';
 type HintDurationStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 interface AppState {
@@ -71,6 +72,7 @@ interface AppState {
   sfxVolume: number;
   bgmVolume: number;
   visualMode: VisualMode;
+  theme: ThemeMode;
   mysteryModeEnabled: boolean;
   hintDuration: HintDurationStep;
   phases: Record<string, PhaseData>;
@@ -395,6 +397,7 @@ export function initLiquidSort(): () => void {
     sfxVolume: 50,
     bgmVolume: 50,
     visualMode: 'color',
+    theme: 'dark',
     mysteryModeEnabled: true,
     hintDuration: 1,
     phases: {}
@@ -465,6 +468,9 @@ export function initLiquidSort(): () => void {
   const btnRestart = document.getElementById('btn-restart') as HTMLButtonElement;
   const btnExtra = document.getElementById('btn-extra') as HTMLButtonElement;
   const extraBadgeEl = document.getElementById('extra-badge') as HTMLElement;
+  const btnTheme = document.getElementById('btn-theme') as HTMLButtonElement | null;
+  const iconThemeMoon = document.getElementById('icon-theme-moon') as unknown as SVGSVGElement | null;
+  const iconThemeSun = document.getElementById('icon-theme-sun') as unknown as SVGSVGElement | null;
   const btnSettings = document.getElementById('btn-settings') as HTMLButtonElement;
   const btnSound = document.getElementById('btn-sound') as HTMLButtonElement;
   const iconSoundOn = document.getElementById('icon-sound-on') as unknown as SVGSVGElement;
@@ -518,6 +524,8 @@ export function initLiquidSort(): () => void {
   const settingsCatBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-settings-cat]'));
   const settingsSubpanels = Array.from(document.querySelectorAll<HTMLElement>('[data-subpanel]'));
   const settingsListEl = document.getElementById('settings-list') as HTMLElement;
+  const btnThemeDark = document.getElementById('btn-theme-dark') as HTMLButtonElement | null;
+  const btnThemeLight = document.getElementById('btn-theme-light') as HTMLButtonElement | null;
   const toggleMysteryMode = document.getElementById('toggle-mystery-mode') as HTMLInputElement | null;
   const sliderHintDuration = document.getElementById('slider-hint-duration') as HTMLInputElement | null;
   const hintDurationValueEl = document.getElementById('hint-duration-value') as HTMLElement | null;
@@ -559,6 +567,10 @@ export function initLiquidSort(): () => void {
     btnBgm.setAttribute('title', t('titleBgm'));
     btnLanguage.setAttribute('aria-label', t('ariaLanguage'));
     btnLanguage.setAttribute('title', t('titleLanguage'));
+    if (btnTheme) {
+      btnTheme.setAttribute('aria-label', t('ariaTheme'));
+      btnTheme.setAttribute('title', t('titleTheme'));
+    }
     btnSettings.setAttribute('aria-label', t('ariaSettings'));
     btnSettings.setAttribute('title', t('titleSettings'));
     btnSound.setAttribute('aria-label', t('ariaSound'));
@@ -571,6 +583,28 @@ export function initLiquidSort(): () => void {
       }
     });
     syncHintSettingsUI();
+  }
+
+  function applyTheme() {
+    const isLight = appState.theme === 'light';
+    document.documentElement.dataset.theme = isLight ? 'light' : 'dark';
+    if (btnTheme) {
+      btnTheme.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+    }
+    if (iconThemeMoon) {
+      iconThemeMoon.style.display = isLight ? 'none' : 'block';
+    }
+    if (iconThemeSun) {
+      iconThemeSun.style.display = isLight ? 'block' : 'none';
+    }
+    if (btnThemeDark) {
+      btnThemeDark.classList.toggle('active', !isLight);
+      btnThemeDark.setAttribute('aria-checked', !isLight ? 'true' : 'false');
+    }
+    if (btnThemeLight) {
+      btnThemeLight.classList.toggle('active', isLight);
+      btnThemeLight.setAttribute('aria-checked', isLight ? 'true' : 'false');
+    }
   }
 
   function activePhaseDef(): PhaseDef {
@@ -2172,8 +2206,11 @@ export function initLiquidSort(): () => void {
         if (m.x > w + 8) m.x = -8;
 
         const twinkle = 0.75 + 0.25 * Math.sin(m.phase * 1.8);
-        ambientCtx.globalAlpha = m.alpha * twinkle;
-        ambientCtx.fillStyle = m.isCyan ? '#73E4FF' : '#E2E8F0';
+        const isLightTheme = appState.theme === 'light';
+        ambientCtx.globalAlpha = m.alpha * twinkle * (isLightTheme ? 1.15 : 1);
+        ambientCtx.fillStyle = isLightTheme
+          ? (m.isCyan ? '#0284C7' : '#64748B')
+          : (m.isCyan ? '#73E4FF' : '#E2E8F0');
         ambientCtx.beginPath();
         ambientCtx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
         ambientCtx.fill();
@@ -3110,6 +3147,7 @@ export function initLiquidSort(): () => void {
       sfxVolume: 50,
       bgmVolume: 50,
       visualMode: 'color',
+      theme: 'dark',
       mysteryModeEnabled: true,
       hintDuration: 1,
       phases: {}
@@ -3239,6 +3277,7 @@ export function initLiquidSort(): () => void {
       } else {
         appState.visualMode = 'color';
       }
+      appState.theme = parsed.theme === 'light' ? 'light' : 'dark';
       appState.mysteryModeEnabled = typeof parsed.mysteryModeEnabled === 'boolean' ? parsed.mysteryModeEnabled : true;
       if (parsed.inhibitHints === true) {
         appState.hintDuration = 0;
@@ -4707,7 +4746,8 @@ export function initLiquidSort(): () => void {
 
   function updateSettingsSummaries() {
     if (settingsSummaryVisualEl) {
-      settingsSummaryVisualEl.textContent = getLocalizedVisualMode(appState.visualMode).title;
+      const themeLabel = appState.theme === 'light' ? t('settingsThemeLight') : t('settingsThemeDark');
+      settingsSummaryVisualEl.textContent = `${getLocalizedVisualMode(appState.visualMode).title} • ${themeLabel}`;
     }
     if (settingsSummaryGameplayEl) {
       const hintLabel = getHintDurationLabel(appState.hintDuration);
@@ -4838,6 +4878,7 @@ export function initLiquidSort(): () => void {
   }
 
   function renderSettingsModal() {
+    applyTheme();
     syncMysterySettingsUI();
     syncHintSettingsUI();
     syncVolumeSliderUI();
@@ -5306,6 +5347,19 @@ export function initLiquidSort(): () => void {
     saveState();
   };
 
+  const setThemeMode = (mode: ThemeMode) => {
+    ensureAudio();
+    playSelectSound();
+    if (appState.theme === mode) return;
+    appState.theme = mode;
+    applyTheme();
+    updateSettingsSummaries();
+    saveState();
+  };
+  const onThemeDarkClick = () => setThemeMode('dark');
+  const onThemeLightClick = () => setThemeMode('light');
+  const onToggleThemeClick = () => setThemeMode(appState.theme === 'light' ? 'dark' : 'light');
+
   btnStuckUndo.addEventListener('click', onStuckUndo);
   btnStuckExtra?.addEventListener('click', onStuckExtra);
   btnStuckRestart.addEventListener('click', onStuckRestart);
@@ -5315,6 +5369,9 @@ export function initLiquidSort(): () => void {
     btnDebugDeadlock?.addEventListener('click', onDebugDeadlockClick);
     document.addEventListener('keydown', onDebugKeyDown);
   }
+  btnTheme?.addEventListener('click', onToggleThemeClick);
+  btnThemeDark?.addEventListener('click', onThemeDarkClick);
+  btnThemeLight?.addEventListener('click', onThemeLightClick);
   toggleMysteryMode?.addEventListener('change', onToggleMysteryMode);
   sliderHintDuration?.addEventListener('input', onHintDurationSliderInput);
   sliderSfxVolume?.addEventListener('input', onVolumeSliderInput);
@@ -5324,6 +5381,7 @@ export function initLiquidSort(): () => void {
   if (!loadState()) {
     initDefaultState();
   }
+  applyTheme();
   syncMysterySettingsUI();
   syncHintSettingsUI();
   syncVolumeSliderUI();
@@ -5407,6 +5465,9 @@ export function initLiquidSort(): () => void {
     // TODO: REMOVER ANTES DO LANÇAMENTO
     btnDebugDeadlock?.removeEventListener('click', onDebugDeadlockClick);
     document.removeEventListener('keydown', onDebugKeyDown);
+    btnTheme?.removeEventListener('click', onToggleThemeClick);
+    btnThemeDark?.removeEventListener('click', onThemeDarkClick);
+    btnThemeLight?.removeEventListener('click', onThemeLightClick);
     toggleMysteryMode?.removeEventListener('change', onToggleMysteryMode);
     sliderHintDuration?.removeEventListener('input', onHintDurationSliderInput);
     sliderSfxVolume?.removeEventListener('input', onVolumeSliderInput);
