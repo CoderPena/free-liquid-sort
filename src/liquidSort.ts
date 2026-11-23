@@ -10,6 +10,15 @@ import {
   translate,
   VisualModeId,
 } from './i18n';
+import {
+  applyRoundVictoryRewards,
+  createDefaultRewardsState,
+  evaluateMatchEfficiency,
+  RewardsState,
+  RoundVictoryOutcome,
+  sanitizeRewardsState,
+  StarRating,
+} from './rewards';
 
 interface ColorDef {
   name: string;
@@ -19,7 +28,7 @@ interface ColorDef {
 }
 
 interface PhaseDef {
-  id: string;
+  id: PhaseId;
   name: string;
   totalRounds: number;
   isTutorial?: boolean;
@@ -27,7 +36,7 @@ interface PhaseDef {
   colorSplitRange: [number, number];
   emptyRange: [number, number];
   emptySplitRange: [number, number];
-  nextPhaseId: string | null;
+  nextPhaseId: PhaseId | null;
   desc: string;
 }
 
@@ -49,6 +58,8 @@ interface BoardState {
   baseIdealMoves: number;
   extraTubeUsed: boolean;
   tutorialStep?: number;
+  rewardProcessed?: boolean;
+  lastVictoryReward?: RoundVictoryOutcome | null;
 }
 
 interface PhaseData {
@@ -66,7 +77,7 @@ type HintDurationStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 interface AppState {
   language: LangCode;
-  activePhaseId: string;
+  activePhaseId: PhaseId;
   bgmTrack: string;
   muted: boolean;
   sfxVolume: number;
@@ -76,6 +87,7 @@ interface AppState {
   mysteryModeEnabled: boolean;
   hintDuration: HintDurationStep;
   phases: Record<string, PhaseData>;
+  rewards: RewardsState;
 }
 
 interface TutorialStep {
@@ -143,8 +155,8 @@ export const isDebugMode: boolean =
   (import.meta.env.VITE_DEBUG_MODE === 'true' || import.meta.env.DEV);
 
 export function initLiquidSort(): () => void {
-  // v3 starts fresh from v2 to cleanly initialize Treinamento and bgmTrack
-  const STORAGE_KEY = 'liquid_sort_save_v3';
+  // v4 integrates RewardsState and idempotent victory reward snapshots
+  const STORAGE_KEY = 'liquid_sort_save_v4';
   const TUBE_CAPACITY = 4;
 
   const COLORS: ColorDef[] = [
@@ -400,7 +412,8 @@ export function initLiquidSort(): () => void {
     theme: 'dark',
     mysteryModeEnabled: true,
     hintDuration: 1,
-    phases: {}
+    phases: {},
+    rewards: createDefaultRewardsState(),
   };
 
   const t: typeof translate extends (lang: LangCode, key: infer K, vars?: infer V) => string
@@ -3150,7 +3163,8 @@ export function initLiquidSort(): () => void {
       theme: 'dark',
       mysteryModeEnabled: true,
       hintDuration: 1,
-      phases: {}
+      phases: {},
+      rewards: createDefaultRewardsState(),
     };
     PHASES.forEach(p => {
       appState.phases[p.id] = createDefaultPhaseData();
@@ -3245,6 +3259,79 @@ export function initLiquidSort(): () => void {
     }
   }
 
+  function sanitizeLastVictoryReward(raw: unknown): RoundVictoryOutcome | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const obj = raw as Record<string, unknown>;
+
+    const validStars =
+      obj.stars === 1 || obj.stars === 2 || obj.stars === 3 || obj.stars === null;
+    if (!validStars) return null;
+
+    const validRawEff =
+      obj.rawEfficiency === null ||
+      (typeof obj.rawEfficiency === 'number' &&
+        Number.isFinite(obj.rawEfficiency) &&
+        obj.rawEfficiency >= 0 &&
+        obj.rawEfficiency <= 100);
+    if (!validRawEff) return null;
+
+    if (typeof obj.displayEfficiency !== 'string') return null;
+
+    const isSafeNonNegInt = (v: unknown): v is number =>
+      typeof v === 'number' && Number.isSafeInteger(v) && v >= 0;
+
+    if (
+      !isSafeNonNegInt(obj.coinsRoundBase) ||
+      !isSafeNonNegInt(obj.coinsStarBonus) ||
+      !isSafeNonNegInt(obj.coinsPhaseBonus) ||
+      !isSafeNonNegInt(obj.coinsTrainingBonus) ||
+      !isSafeNonNegInt(obj.coinsEarnedTotal) ||
+      !isSafeNonNegInt(obj.totalCoinsAfter)
+    ) {
+      return null;
+    }
+
+    if (
+      typeof obj.isNewBestStars !== 'boolean' ||
+      typeof obj.isNewBestEfficiency !== 'boolean'
+    ) {
+      return null;
+    }
+
+    return {
+      rawEfficiency: obj.rawEfficiency as number | null,
+      displayEfficiency: obj.displayEfficiency,
+      stars: obj.stars as StarRating | null,
+      coinsRoundBase: obj.coinsRoundBase,
+      coinsStarBonus: obj.coinsStarBonus,
+      coinsPhaseBonus: obj.coinsPhaseBonus,
+      coinsTrainingBonus: obj.coinsTrainingBonus,
+      coinsEarnedTotal: obj.coinsEarnedTotal,
+      totalCoinsAfter: obj.totalCoinsAfter,
+      isNewBestStars: obj.isNewBestStars,
+      isNewBestEfficiency: obj.isNewBestEfficiency,
+    };
+  }
+
+  function sanitizeRoundNumberList(raw: unknown, totalRounds: number): number[] {
+    if (!Array.isArray(raw)) return [];
+    const seen = new Set<number>();
+    const result: number[] = [];
+    for (const item of raw) {
+      if (
+        typeof item === 'number' &&
+        Number.isInteger(item) &&
+        item >= 1 &&
+        item <= totalRounds &&
+        !seen.has(item)
+      ) {
+        seen.add(item);
+        result.push(item);
+      }
+    }
+    return result;
+  }
+
   function loadState(): boolean {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -3255,8 +3342,9 @@ export function initLiquidSort(): () => void {
       initDefaultState();
       const savedLang = normalizeLangCode(parsed.language);
       appState.language = savedLang || detectSystemLanguage();
-      if (PHASES.some(p => p.id === parsed.activePhaseId)) {
-        appState.activePhaseId = parsed.activePhaseId;
+      const matchedPhase = PHASES.find(p => p.id === parsed.activePhaseId);
+      if (matchedPhase) {
+        appState.activePhaseId = matchedPhase.id;
       }
       if (BGM_TRACKS[parsed.bgmTrack]) {
         appState.bgmTrack = parsed.bgmTrack;
@@ -3294,18 +3382,28 @@ export function initLiquidSort(): () => void {
         appState.hintDuration = 1;
       }
 
+      appState.rewards = sanitizeRewardsState(parsed.rewards, PHASES);
+
       PHASES.forEach(p => {
         const savedP = parsed.phases[p.id];
         if (savedP && typeof savedP.currentRound === 'number') {
           const loadedBoard: BoardState | null = savedP.board && Array.isArray(savedP.board.tubes) ? savedP.board : null;
           if (loadedBoard) {
             ensureBoardMysteryArrays(loadedBoard);
+            loadedBoard.rewardProcessed = savedP.board.rewardProcessed === true;
+            loadedBoard.lastVictoryReward = sanitizeLastVictoryReward(savedP.board.lastVictoryReward);
           }
+          const completedRounds = sanitizeRoundNumberList(savedP.completedRounds, p.totalRounds);
+          const completedSet = new Set(completedRounds);
+          const easyRounds = sanitizeRoundNumberList(savedP.easyRounds, p.totalRounds)
+            .filter(r => completedSet.has(r));
+          const phaseCompleted = areAllRoundsCompleted(completedRounds, p.totalRounds);
+
           appState.phases[p.id] = {
             currentRound: Math.min(p.totalRounds, Math.max(1, savedP.currentRound)),
-            completedRounds: Array.isArray(savedP.completedRounds) ? savedP.completedRounds : [],
-            easyRounds: Array.isArray(savedP.easyRounds) ? savedP.easyRounds : [],
-            phaseCompleted: Boolean(savedP.phaseCompleted),
+            completedRounds,
+            easyRounds,
+            phaseCompleted,
             seed: typeof savedP.seed === 'number' ? savedP.seed : randomSeedInt(),
             board: loadedBoard
           };
@@ -3336,7 +3434,9 @@ export function initLiquidSort(): () => void {
         idealMoves: lesson.idealMoves,
         baseIdealMoves: lesson.idealMoves,
         extraTubeUsed: false,
-        tutorialStep: 0
+        tutorialStep: 0,
+        rewardProcessed: false,
+        lastVictoryReward: null,
       };
       resetTubeSequence();
       saveState();
@@ -3357,10 +3457,24 @@ export function initLiquidSort(): () => void {
       moves: 0,
       idealMoves: gen.idealMoves,
       baseIdealMoves: gen.idealMoves,
-      extraTubeUsed: false
+      extraTubeUsed: false,
+      rewardProcessed: false,
+      lastVictoryReward: null,
     };
     resetTubeSequence();
     saveState();
+  }
+
+  function ensureWonBoardProcessedAndShown(): boolean {
+    const board = activeBoard();
+    if (!isGameWon(board.tubes)) {
+      return false;
+    }
+    if (!board.rewardProcessed) {
+      recordRoundVictory();
+    }
+    showVictoryModal();
+    return true;
   }
 
   function switchToPhase(phaseId: string) {
@@ -3376,6 +3490,9 @@ export function initLiquidSort(): () => void {
     resetTubeSequence();
     saveState();
     render();
+    if (!ensureWonBoardProcessedAndShown() && !hasValidMoves(activeBoard().tubes)) {
+      showStuckModal();
+    }
   }
 
   // =========================================================
@@ -3508,11 +3625,6 @@ export function initLiquidSort(): () => void {
   // =========================================================
   // Rendering & Efficiency Metrics
   // =========================================================
-  function computeEfficiency(moves: number, idealMoves: number): number | null {
-    if (moves <= 0 || idealMoves <= 0) return null;
-    return Math.min(100, Math.round((idealMoves / moves) * 100));
-  }
-
   function getEfficiencyClass(eff: number | null): string {
     if (eff === null) return '';
     if (eff >= 90) return 'eff-high';
@@ -3594,9 +3706,9 @@ export function initLiquidSort(): () => void {
     movesNumEl.textContent = String(board.moves);
     idealMovesNumEl.textContent = board.idealMoves > 0 ? String(board.idealMoves) : '—';
 
-    const eff = computeEfficiency(board.moves, board.idealMoves);
-    effNumEl.textContent = eff === null ? '—' : `${eff}%`;
-    effNumEl.className = 'stat-chip-val ' + getEfficiencyClass(eff);
+    const effEval = evaluateMatchEfficiency(board.moves, board.idealMoves);
+    effNumEl.textContent = effEval ? effEval.displayEfficiency : '—';
+    effNumEl.className = 'stat-chip-val ' + getEfficiencyClass(effEval ? effEval.rawEfficiency : null);
 
     const won = isGameWon(board.tubes);
     const deadlocked = !isAnimating && !won && (!hasAnyUsefulMove(board.tubes) || isDebugDeadlockForced);
@@ -4163,7 +4275,12 @@ export function initLiquidSort(): () => void {
       isAnimating = false;
 
       const justCompleted = isTubeComplete(dstArr);
-      saveState();
+      const wonNow = isGameWon(board.tubes);
+      if (wonNow) {
+        recordRoundVictory();
+      } else {
+        saveState();
+      }
       render(-1, justCompleted ? dstIdx : -1, didRevealMystery ? srcIdx : -1);
 
       if (didRevealMystery) {
@@ -4176,8 +4293,7 @@ export function initLiquidSort(): () => void {
         triggerTubeCompleteFeedback();
       }
 
-      if (isGameWon(board.tubes)) {
-        recordRoundVictory();
+      if (wonNow) {
         setTimeout(() => {
           playVictoryFanfare();
           showVictoryModal();
@@ -4191,22 +4307,55 @@ export function initLiquidSort(): () => void {
     }, 400);
   }
 
+  function areAllRoundsCompleted(completedRounds: number[], totalRounds: number): boolean {
+    if (completedRounds.length < totalRounds) return false;
+    for (let r = 1; r <= totalRounds; r++) {
+      if (!completedRounds.includes(r)) return false;
+    }
+    return true;
+  }
+
   function recordRoundVictory() {
     const phase = activePhaseDef();
     const pData = activePhaseData();
     const board = activeBoard();
-    const eff = computeEfficiency(board.moves, board.idealMoves) ?? 100;
+
+    if (board.rewardProcessed) {
+      return;
+    }
+
+    const effEval = evaluateMatchEfficiency(board.moves, board.idealMoves);
 
     if (!pData.completedRounds.includes(pData.currentRound)) {
       pData.completedRounds.push(pData.currentRound);
     }
     // Training does not count toward easyRounds / skip-advance logic
-    if (!phase.isTutorial && eff === 100 && !board.extraTubeUsed && !pData.easyRounds.includes(pData.currentRound)) {
+    if (
+      !phase.isTutorial &&
+      effEval !== null &&
+      effEval.rawEfficiency >= 100 &&
+      !board.extraTubeUsed &&
+      !pData.easyRounds.includes(pData.currentRound)
+    ) {
       pData.easyRounds.push(pData.currentRound);
     }
-    if (pData.currentRound >= phase.totalRounds) {
+    if (areAllRoundsCompleted(pData.completedRounds, phase.totalRounds)) {
       pData.phaseCompleted = true;
     }
+
+    const { nextState, outcome } = applyRoundVictoryRewards(appState.rewards, {
+      phaseId: phase.id,
+      round: pData.currentRound,
+      totalRounds: phase.totalRounds,
+      isTutorial: Boolean(phase.isTutorial),
+      moves: board.moves,
+      idealMoves: board.idealMoves,
+    });
+
+    appState.rewards = nextState;
+    board.rewardProcessed = true;
+    board.lastVictoryReward = outcome;
+
     saveState();
   }
 
@@ -4362,6 +4511,8 @@ export function initLiquidSort(): () => void {
     board.moves = 0;
     board.idealMoves = board.baseIdealMoves;
     board.extraTubeUsed = false;
+    board.rewardProcessed = false;
+    board.lastVictoryReward = null;
     isDebugDeadlockForced = false;
     selectedIdx = null;
     clearActiveHint();
@@ -4532,19 +4683,22 @@ export function initLiquidSort(): () => void {
     const phase = activePhaseDef();
     const pData = activePhaseData();
     const board = activeBoard();
-    const eff = computeEfficiency(board.moves, board.idealMoves) ?? 100;
+    const victoryReward = board.lastVictoryReward ?? null;
+    const fallbackEval = victoryReward ? null : evaluateMatchEfficiency(board.moves, board.idealMoves);
+    const rawEff = victoryReward ? victoryReward.rawEfficiency : (fallbackEval ? fallbackEval.rawEfficiency : null);
+    const displayEff = victoryReward ? victoryReward.displayEfficiency : (fallbackEval ? fallbackEval.displayEfficiency : '—');
 
     const isLastRound = pData.currentRound >= phase.totalRounds;
     const nextPhase = phase.nextPhaseId ? getPhaseDef(phase.nextPhaseId) : null;
     const phaseName = getLocalizedPhase(phase.id).name;
     const nextPhaseName = nextPhase ? getLocalizedPhase(nextPhase.id).name : '';
-    const isPerfectRealWin = !phase.isTutorial && eff === 100 && !board.extraTubeUsed;
+    const isPerfectRealWin = !phase.isTutorial && rawEff !== null && rawEff >= 100 && !board.extraTubeUsed;
     const langDict = I18N[appState.language] || I18N.en;
 
     winMovesEl.textContent = String(board.moves);
     winIdealMovesEl.textContent = String(board.idealMoves);
-    winEffEl.textContent = `${eff}%`;
-    winEffEl.className = 'stat-value ' + getEfficiencyClass(eff);
+    winEffEl.textContent = displayEff;
+    winEffEl.className = 'stat-value ' + getEfficiencyClass(rawEff);
 
     skipCalloutEl.classList.remove('visible');
     btnWinAdvance.style.display = 'none';
@@ -5055,6 +5209,11 @@ export function initLiquidSort(): () => void {
     clearVictoryFxTimers();
     victoryModal.classList.remove('open');
     const phase = activePhaseDef();
+    const pData = activePhaseData();
+    if (pData.currentRound < phase.totalRounds && pData.board && isGameWon(pData.board.tubes)) {
+      pData.currentRound += 1;
+      pData.board = null;
+    }
     if (phase.nextPhaseId) {
       switchToPhase(phase.nextPhaseId);
     }
@@ -5102,6 +5261,7 @@ export function initLiquidSort(): () => void {
     PHASES.forEach(p => {
       appState.phases[p.id] = createDefaultPhaseData();
     });
+    appState.rewards = createDefaultRewardsState();
 
     settingsModal.classList.remove('open');
     resetConfirm1Modal?.classList.remove('open');
@@ -5394,9 +5554,7 @@ export function initLiquidSort(): () => void {
     loadOrCreateRoundBoard(startPhase.id, startPhaseData.currentRound);
   }
   render();
-  if (isGameWon(activeBoard().tubes)) {
-    showVictoryModal();
-  } else if (!hasValidMoves(activeBoard().tubes)) {
+  if (!ensureWonBoardProcessedAndShown() && !hasValidMoves(activeBoard().tubes)) {
     showStuckModal();
   }
 
