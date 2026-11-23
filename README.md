@@ -1,11 +1,57 @@
-<div align="center">
+# Free Liquid Sort
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Propósito e Experiência:
 
-  <h1>Built with AI Studio</h2>
+* 100% gratuito e sem atritos (zero anúncios, zero moedas, zero compras, zero bloqueio de fase).
+* Foco em fluidez e relaxamento (ASMR) com visual limpo em fundo escuro azul ciano, feedback tátil, visual e sonoro.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+Mecânica Central e Tabuleiro Inteligente:
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+* Separação clássica (até 10 cores, frascos de capacidade 4).
+* Geração procedural com semente (seed) e validação de solubilidade.
+* Métricas em tempo real (Jogadas, Ideal, Eficiência).
+* Detecção de impasse (deadlock) e animações de despejo (jato líquido SVG, rolha de cortiça, confetes na vitória perfeita).
 
-</div>
+Fases e Progressão (53 Rodadas):
+
+* Todas as fases liberadas desde o início.
+* Treinamento (5), Fácil (8), Médio (12), Difícil (12) e Desafiador (16). Opção de avanço antecipado sem ônus.
+
+Assistência Inteligente e Jogabilidade:
+
+* Dica em 2 Níveis (💡): 1º toque realça destinos válidos, 2º toque aponta a melhor jogada.
+* Tempo da Dica: Slider com 7 paradas (Off, 1s a 5s, ∞).
+* Slot Fantasma +1 Tubo: Frasco tracejado integrado ao tabuleiro.
+* Desfazer completo e reinício seguro (com confirmação).
+
+Modo Mistério (?):
+
+* 0% no Treinamento/Fácil, crescendo nas fases seguintes (máx. 68% do tabuleiro para não perder o contexto).
+* Camadas ocultas aparecem como blocos escuros com ?. Revelação ASMR (pop + fade-in + som de cristal).
+* Regra de Ouro do Desfazer: Cores já reveladas permanecem reveladas mesmo se usar Desfazer.
+* Toggle nas configurações que, se desligado, revela tudo na hora com um Toast de aviso.
+
+Estética ASMR e Layout Responsivo:
+
+* Frascos em silhueta de garrafa, líquidos cintilantes, menisco luminoso.
+* Dock inferior compacto (Desfazer, Dica, Reiniciar, +1 Tubo).
+* Grid adaptativo (1 a 3 fileiras) via ResizeObserver e 100dvh.
+
+Acessibilidade, Áudio e Idiomas:
+
+* 3 modos de daltonismo (Cores, Padrões, Cores + Padrões).
+* Áudio procedural (Web Audio API) com 10 trilhas e efeitos sintetizados, volumes independentes.
+* 8 idiomas com detecção automática e suporte a RTL (Árabe).
+* Persistência total no localStorage.
+
+---
+
+## Como Executar e Implantar o Aplicativo
+
+Pré-requisitos: Node.js
+
+1. Instale as dependências:
+   `npm install`
+2. Configure a variável `GEMINI_API_KEY` no arquivo [.env.local](.env.local) se necessário.
+3. Execute o aplicativo:
+   `npm run dev`

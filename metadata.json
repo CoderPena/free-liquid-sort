@@ -1,0 +1,8 @@
+{
+  "name": "Free Liquid Sort",
+  "description": "Quebra-cabeça de separação de líquidos coloridos com modo treinamento, fases progressivas e trilha sonora procedural.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
