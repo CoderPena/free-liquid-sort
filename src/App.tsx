@@ -170,6 +170,24 @@ export default function App() {
             </div>
           </div>
 
+          <div className="rewards-bar" aria-live="polite">
+            <div id="hud-stars" className="reward-hud-item reward-hud-stars" aria-label="Total stars earned: 0" title="Total Stars">
+              <svg className="reward-hud-icon reward-hud-icon-star" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.4l2.92 5.92 6.53.95-4.72 4.6 1.11 6.5L12 17.3l-5.84 3.07 1.11-6.5-4.72-4.6 6.53-.95L12 2.4z" />
+              </svg>
+              <span id="hud-stars-val" className="reward-hud-val">0</span>
+            </div>
+            <span className="reward-hud-divider" aria-hidden="true"></span>
+            <div id="hud-coins" className="reward-hud-item reward-hud-coins" aria-label="Coin balance: 0" title="Coins">
+              <svg className="reward-hud-icon reward-hud-icon-coin" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9.5" className="coin-outer" />
+                <circle cx="12" cy="12" r="6.3" className="coin-inner" />
+                <rect x="10.9" y="8" width="2.2" height="8" rx="1.1" className="coin-glyph" />
+              </svg>
+              <span id="hud-coins-val" className="reward-hud-val">0</span>
+            </div>
+          </div>
+
           <div className="stats-bar">
             <div className="stat-chip">
               <span className="stat-chip-label" data-i18n="statMoves">Jogadas</span>
@@ -296,6 +314,13 @@ export default function App() {
           </div>
           <div id="win-eyebrow" className="win-eyebrow">Parabéns!</div>
           <h2 id="win-title" className="modal-title">Rodada 1 Concluída!</h2>
+          <div id="win-stars" className="win-stars" role="img" aria-label="0 de 3 estrelas">
+            {[0, 1, 2].map((idx) => (
+              <svg key={idx} className="win-star empty" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.4l2.92 5.92 6.53.95-4.72 4.6 1.11 6.5L12 17.3l-5.84 3.07 1.11-6.5-4.72-4.6 6.53-.95L12 2.4z" />
+              </svg>
+            ))}
+          </div>
           <p id="win-subtitle" className="modal-subtitle">Todas as cores foram separadas com perfeição.</p>
 
           <div className="modal-stats">
@@ -310,6 +335,26 @@ export default function App() {
             <div className="stat-pill">
               <div className="stat-label" data-i18n="statEffFull">Eficiência</div>
               <div className="stat-value" id="win-eff">100%</div>
+            </div>
+          </div>
+
+          <div id="win-rewards" className="win-rewards-card">
+            <div className="win-rewards-row win-rewards-earned-row">
+              <span className="win-rewards-label" data-i18n="winRewardsEarnedLabel">Moedas recebidas</span>
+              <span id="win-coins-earned" className="win-rewards-value win-coins-earned">+0</span>
+            </div>
+            <div id="win-coins-breakdown" className="win-coins-breakdown" style={{ display: 'none' }}></div>
+            <div className="win-rewards-divider" aria-hidden="true"></div>
+            <div className="win-rewards-row win-rewards-balance-row">
+              <span className="win-rewards-label" data-i18n="winRewardsBalanceLabel">Saldo atual</span>
+              <span className="win-rewards-balance-wrap">
+                <svg className="win-reward-coin-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9.5" className="coin-outer" />
+                  <circle cx="12" cy="12" r="6.3" className="coin-inner" />
+                  <rect x="10.9" y="8" width="2.2" height="8" rx="1.1" className="coin-glyph" />
+                </svg>
+                <span id="win-coins-balance" className="win-rewards-value win-coins-balance">0</span>
+              </span>
             </div>
           </div>
 

@@ -176,6 +176,21 @@ Regras de consistência:
 5. **Detalhes de recompensas ou marcos adicionais ainda não aprovados.**
 6. **Interface e traduções do sistema de recompensas.**
 
+### 8.B — Decisões aprovadas
+
+**1. Indicadores permanentes de recompensas (HUD)**
+
+É aprovado e desejado exibir permanentemente no cabeçalho do jogo:
+
+- Total acumulado de estrelas.
+- Saldo atual de moedas.
+
+Os dois indicadores devem aparecer juntos, em uma barra compacta, posicionada abaixo da linha superior de controles e acima da barra de estatísticas, conforme a referência visual aprovada em 24/11/2026.
+
+Os valores devem refletir o estado persistido e ser atualizados sempre que as recompensas forem alteradas.
+
+Essa apresentação permanente não substitui o detalhamento das recompensas na tela de vitória, que também deve ser mantido.
+
 ### B. Questões técnicas pendentes *(Identificadas na auditoria do código atual)*
 1. **Separação entre exibição e cálculo real de eficiência (`/src/liquidSort.ts`):**
    - Atualmente `computeEfficiency(moves, idealMoves)` aplica `Math.round((idealMoves / moves) * 100)` no próprio retorno.

@@ -127,6 +127,11 @@ export interface TranslationDict {
   statEff: string;
   statEffFull: string;
 
+  hudStarsAria: string;
+  hudStarsTitle: string;
+  hudCoinsAria: string;
+  hudCoinsTitle: string;
+
   ctrlUndo: string;
   ctrlHint: string;
   ctrlRestart: string;
@@ -164,6 +169,15 @@ export interface TranslationDict {
   winBtnNextPhase: string;
   winMasterEyebrow: string;
   winReplayPhase: string;
+  winStarsAria: string;
+  winStarsUnavailableAria: string;
+  winRewardsEarnedLabel: string;
+  winRewardsBalanceLabel: string;
+  winRewardsAlreadyClaimed: string;
+  winRewardBaseTag: string;
+  winRewardStarsTag: string;
+  winRewardPhaseTag: string;
+  winRewardTrainingTag: string;
 
   phasesModalTitle: string;
   phasesModalSubtitle: string;
@@ -259,6 +273,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: 'Eff.',
     statEffFull: 'Efficiency',
 
+    hudStarsAria: 'Total stars earned: {count}',
+    hudStarsTitle: 'Total Stars',
+    hudCoinsAria: 'Coin balance: {count}',
+    hudCoinsTitle: 'Coins',
+
     ctrlUndo: 'Undo',
     ctrlHint: 'Hint',
     ctrlRestart: 'Restart',
@@ -297,6 +316,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: 'Go to {nextPhase}',
     winMasterEyebrow: 'Liquid Sort Master!',
     winReplayPhase: 'Play Phase Again',
+    winStarsAria: '{stars} of 3 stars',
+    winStarsUnavailableAria: 'Star rating unavailable',
+    winRewardsEarnedLabel: 'Coins earned',
+    winRewardsBalanceLabel: 'Current balance',
+    winRewardsAlreadyClaimed: 'Reward already claimed',
+    winRewardBaseTag: 'Round +{coins}',
+    winRewardStarsTag: 'Stars +{coins}',
+    winRewardPhaseTag: 'Phase +{coins}',
+    winRewardTrainingTag: 'Training +{coins}',
 
     phasesModalTitle: 'Choose Phase',
     phasesModalSubtitle: 'All phases are unlocked. Start with Training or pick your challenge.',
@@ -470,6 +498,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: 'Efic.',
     statEffFull: 'Eficiência',
 
+    hudStarsAria: 'Total de estrelas conquistadas: {count}',
+    hudStarsTitle: 'Total de Estrelas',
+    hudCoinsAria: 'Saldo de moedas: {count}',
+    hudCoinsTitle: 'Moedas',
+
     ctrlUndo: 'Desfazer',
     ctrlHint: 'Dica',
     ctrlRestart: 'Reiniciar',
@@ -508,6 +541,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: 'Ir para Fase {nextPhase}',
     winMasterEyebrow: 'Mestre do Liquid Sort!',
     winReplayPhase: 'Jogar Fase Novamente',
+    winStarsAria: '{stars} de 3 estrelas',
+    winStarsUnavailableAria: 'Estrelas indisponíveis',
+    winRewardsEarnedLabel: 'Moedas recebidas',
+    winRewardsBalanceLabel: 'Saldo atual',
+    winRewardsAlreadyClaimed: 'Recompensa já recebida',
+    winRewardBaseTag: 'Rodada +{coins}',
+    winRewardStarsTag: 'Estrelas +{coins}',
+    winRewardPhaseTag: 'Fase +{coins}',
+    winRewardTrainingTag: 'Treino +{coins}',
 
     phasesModalTitle: 'Escolher Fase',
     phasesModalSubtitle: 'Todas as fases são liberadas. Comece pelo Treinamento ou escolha seu desafio.',
@@ -681,6 +723,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: 'Efic.',
     statEffFull: 'Eficiencia',
 
+    hudStarsAria: 'Total de estrellas obtenidas: {count}',
+    hudStarsTitle: 'Total de Estrellas',
+    hudCoinsAria: 'Saldo de monedas: {count}',
+    hudCoinsTitle: 'Monedas',
+
     ctrlUndo: 'Deshacer',
     ctrlHint: 'Pista',
     ctrlRestart: 'Reiniciar',
@@ -719,6 +766,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: 'Ir a Fase {nextPhase}',
     winMasterEyebrow: '¡Maestro de Liquid Sort!',
     winReplayPhase: 'Jugar Fase de Nuevo',
+    winStarsAria: '{stars} de 3 estrellas',
+    winStarsUnavailableAria: 'Estrellas no disponibles',
+    winRewardsEarnedLabel: 'Monedas ganadas',
+    winRewardsBalanceLabel: 'Saldo actual',
+    winRewardsAlreadyClaimed: 'Recompensa ya reclamada',
+    winRewardBaseTag: 'Ronda +{coins}',
+    winRewardStarsTag: 'Estrellas +{coins}',
+    winRewardPhaseTag: 'Fase +{coins}',
+    winRewardTrainingTag: 'Práctica +{coins}',
 
     phasesModalTitle: 'Elegir Fase',
     phasesModalSubtitle: 'Todas las fases están desbloqueadas. Empieza en Entrenamiento o elige tu reto.',
@@ -892,6 +948,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: '效率',
     statEffFull: '效率',
 
+    hudStarsAria: '已获得总星数：{count}',
+    hudStarsTitle: '总星数',
+    hudCoinsAria: '当前金币余额：{count}',
+    hudCoinsTitle: '金币',
+
     ctrlUndo: '撤销',
     ctrlHint: '提示',
     ctrlRestart: '重开',
@@ -930,6 +991,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: '进入 {nextPhase} 阶段',
     winMasterEyebrow: '液体分类大师！',
     winReplayPhase: '再玩一次本阶段',
+    winStarsAria: '获得 {stars}/3 颗星',
+    winStarsUnavailableAria: '星级评定不可用',
+    winRewardsEarnedLabel: '本局获得金币',
+    winRewardsBalanceLabel: '当前余额',
+    winRewardsAlreadyClaimed: '奖励已领取',
+    winRewardBaseTag: '通关 +{coins}',
+    winRewardStarsTag: '星级 +{coins}',
+    winRewardPhaseTag: '阶段 +{coins}',
+    winRewardTrainingTag: '训练 +{coins}',
 
     phasesModalTitle: '选择阶段',
     phasesModalSubtitle: '所有阶段均已解锁。从训练开始或直接选择挑战。',
@@ -1103,6 +1173,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: 'दक्षता',
     statEffFull: 'दक्षता',
 
+    hudStarsAria: 'कुल अर्जित सितारे: {count}',
+    hudStarsTitle: 'कुल सितारे',
+    hudCoinsAria: 'वर्तमान सिक्के: {count}',
+    hudCoinsTitle: 'सिक्के',
+
     ctrlUndo: 'पूर्ववत',
     ctrlHint: 'संकेत',
     ctrlRestart: 'रीस्टार्ट',
@@ -1141,6 +1216,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: '{nextPhase} चरण में जाएं',
     winMasterEyebrow: 'लिक्विड सॉर्ट मास्टर!',
     winReplayPhase: 'चरण फिर से खेलें',
+    winStarsAria: '3 में से {stars} सितारे',
+    winStarsUnavailableAria: 'सितारा रेटिंग उपलब्ध नहीं',
+    winRewardsEarnedLabel: 'प्राप्त सिक्के',
+    winRewardsBalanceLabel: 'वर्तमान शेष',
+    winRewardsAlreadyClaimed: 'इनाम पहले ही मिल चुका है',
+    winRewardBaseTag: 'राउंड +{coins}',
+    winRewardStarsTag: 'सितारे +{coins}',
+    winRewardPhaseTag: 'चरण +{coins}',
+    winRewardTrainingTag: 'प्रशिक्षण +{coins}',
 
     phasesModalTitle: 'चरण चुनें',
     phasesModalSubtitle: 'सभी चरण अनलॉक हैं। प्रशिक्षण से शुरू करें या अपनी चुनौती चुनें।',
@@ -1314,6 +1398,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: 'الكفاءة',
     statEffFull: 'الكفاءة',
 
+    hudStarsAria: 'إجمالي النجوم المكتسبة: {count}',
+    hudStarsTitle: 'إجمالي النجوم',
+    hudCoinsAria: 'رصيد العملات الحالي: {count}',
+    hudCoinsTitle: 'العملات',
+
     ctrlUndo: 'تراجع',
     ctrlHint: 'تلميح',
     ctrlRestart: 'إعادة',
@@ -1352,6 +1441,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: 'الذهاب إلى {nextPhase}',
     winMasterEyebrow: 'سيد فرز السوائل!',
     winReplayPhase: 'إعادة لعب المرحلة',
+    winStarsAria: '{stars} من 3 نجوم',
+    winStarsUnavailableAria: 'التقييم بالنجوم غير متاح',
+    winRewardsEarnedLabel: 'العملات المكتسبة',
+    winRewardsBalanceLabel: 'الرصيد الحالي',
+    winRewardsAlreadyClaimed: 'تم استلام المكافأة مسبقاً',
+    winRewardBaseTag: 'الجولة +{coins}',
+    winRewardStarsTag: 'النجوم +{coins}',
+    winRewardPhaseTag: 'المرحلة +{coins}',
+    winRewardTrainingTag: 'التدريب +{coins}',
 
     phasesModalTitle: 'اختر المرحلة',
     phasesModalSubtitle: 'جميع المراحل مفتوحة. ابدأ بالتدريب أو اختر التحدي المناسب لك.',
@@ -1525,6 +1623,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: 'Effic.',
     statEffFull: 'Efficacité',
 
+    hudStarsAria: 'Total d’étoiles obtenues : {count}',
+    hudStarsTitle: 'Total d’étoiles',
+    hudCoinsAria: 'Solde de pièces : {count}',
+    hudCoinsTitle: 'Pièces',
+
     ctrlUndo: 'Annuler',
     ctrlHint: 'Indice',
     ctrlRestart: 'Rejouer',
@@ -1563,6 +1666,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: 'Aller à {nextPhase}',
     winMasterEyebrow: 'Maître de Liquid Sort !',
     winReplayPhase: 'Rejouer la phase',
+    winStarsAria: '{stars} sur 3 étoiles',
+    winStarsUnavailableAria: 'Étoiles indisponibles',
+    winRewardsEarnedLabel: 'Pièces gagnées',
+    winRewardsBalanceLabel: 'Solde actuel',
+    winRewardsAlreadyClaimed: 'Récompense déjà reçue',
+    winRewardBaseTag: 'Manche +{coins}',
+    winRewardStarsTag: 'Étoiles +{coins}',
+    winRewardPhaseTag: 'Phase +{coins}',
+    winRewardTrainingTag: 'Entraînement +{coins}',
 
     phasesModalTitle: 'Choisir une phase',
     phasesModalSubtitle: 'Toutes les phases sont débloquées. Commencez par l’Entraînement ou choisissez votre défi.',
@@ -1736,6 +1848,11 @@ export const I18N: Record<LangCode, TranslationDict> = {
     statEff: 'Эфф.',
     statEffFull: 'Эффект.',
 
+    hudStarsAria: 'Всего заработано звёзд: {count}',
+    hudStarsTitle: 'Всего звёзд',
+    hudCoinsAria: 'Текущий баланс монет: {count}',
+    hudCoinsTitle: 'Монеты',
+
     ctrlUndo: 'Отмена',
     ctrlHint: 'Подсказка',
     ctrlRestart: 'Сброс',
@@ -1774,6 +1891,15 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winBtnNextPhase: 'Перейти к «{nextPhase}»',
     winMasterEyebrow: 'Мастер Liquid Sort!',
     winReplayPhase: 'Сыграть этап снова',
+    winStarsAria: '{stars} из 3 звёзд',
+    winStarsUnavailableAria: 'Оценка в звёздах недоступна',
+    winRewardsEarnedLabel: 'Получено монет',
+    winRewardsBalanceLabel: 'Текущий баланс',
+    winRewardsAlreadyClaimed: 'Награда уже получена',
+    winRewardBaseTag: 'Раунд +{coins}',
+    winRewardStarsTag: 'Звёзды +{coins}',
+    winRewardPhaseTag: 'Этап +{coins}',
+    winRewardTrainingTag: 'Обучение +{coins}',
 
     phasesModalTitle: 'Выбрать этап',
     phasesModalSubtitle: 'Все этапы открыты. Начните с Обучения или выберите свой уровень сложности.',

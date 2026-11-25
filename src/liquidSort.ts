@@ -14,6 +14,7 @@ import {
   applyRoundVictoryRewards,
   createDefaultRewardsState,
   evaluateMatchEfficiency,
+  getTotalEarnedStars,
   RewardsState,
   RoundVictoryOutcome,
   sanitizeRewardsState,
@@ -463,6 +464,11 @@ export function initLiquidSort(): () => void {
   const langFlagEl = document.getElementById('lang-flag') as HTMLElement;
   const langCodeEl = document.getElementById('lang-code') as HTMLElement;
 
+  const hudStarsEl = document.getElementById('hud-stars') as HTMLElement | null;
+  const hudStarsValEl = document.getElementById('hud-stars-val') as HTMLElement | null;
+  const hudCoinsEl = document.getElementById('hud-coins') as HTMLElement | null;
+  const hudCoinsValEl = document.getElementById('hud-coins-val') as HTMLElement | null;
+
   const movesNumEl = document.getElementById('moves-num') as HTMLElement;
   const idealMovesNumEl = document.getElementById('ideal-moves-num') as HTMLElement;
   const effNumEl = document.getElementById('eff-num') as HTMLElement;
@@ -501,10 +507,14 @@ export function initLiquidSort(): () => void {
   const victoryModal = document.getElementById('victory-modal') as HTMLElement;
   const winEyebrowEl = document.getElementById('win-eyebrow') as HTMLElement;
   const winTitleEl = document.getElementById('win-title') as HTMLElement;
+  const winStarsEl = document.getElementById('win-stars') as HTMLElement | null;
   const winSubtitleEl = document.getElementById('win-subtitle') as HTMLElement;
   const winMovesEl = document.getElementById('win-moves') as HTMLElement;
   const winIdealMovesEl = document.getElementById('win-ideal-moves') as HTMLElement;
   const winEffEl = document.getElementById('win-eff') as HTMLElement;
+  const winCoinsEarnedEl = document.getElementById('win-coins-earned') as HTMLElement | null;
+  const winCoinsBreakdownEl = document.getElementById('win-coins-breakdown') as HTMLElement | null;
+  const winCoinsBalanceEl = document.getElementById('win-coins-balance') as HTMLElement | null;
   const skipCalloutEl = document.getElementById('skip-callout') as HTMLElement;
   const skipCalloutTextEl = document.getElementById('skip-callout-text') as HTMLElement;
   const btnWinPrimary = document.getElementById('btn-win-primary') as HTMLButtonElement;
@@ -596,6 +606,7 @@ export function initLiquidSort(): () => void {
       }
     });
     syncHintSettingsUI();
+    updateRewardsHud();
   }
 
   function applyTheme() {
@@ -3472,6 +3483,7 @@ export function initLiquidSort(): () => void {
     }
     if (!board.rewardProcessed) {
       recordRoundVictory();
+      updateRewardsHud();
     }
     showVictoryModal();
     return true;
@@ -3689,10 +3701,32 @@ export function initLiquidSort(): () => void {
     return boardEl.querySelector(`.tube[data-index="${idx}"]`);
   }
 
+  function updateRewardsHud() {
+    const totalStars = getTotalEarnedStars(appState.rewards, PHASES).earned;
+    const totalCoins = appState.rewards.coins;
+
+    if (hudStarsValEl) {
+      hudStarsValEl.textContent = String(totalStars);
+    }
+    if (hudStarsEl) {
+      hudStarsEl.setAttribute('aria-label', t('hudStarsAria', { count: totalStars }));
+      hudStarsEl.setAttribute('title', t('hudStarsTitle'));
+    }
+    if (hudCoinsValEl) {
+      hudCoinsValEl.textContent = String(totalCoins);
+    }
+    if (hudCoinsEl) {
+      hudCoinsEl.setAttribute('aria-label', t('hudCoinsAria', { count: totalCoins }));
+      hudCoinsEl.setAttribute('title', t('hudCoinsTitle'));
+    }
+  }
+
   function updateUIHeaderAndControls() {
     const phase = activePhaseDef();
     const pData = activePhaseData();
     const board = activeBoard();
+
+    updateRewardsHud();
 
     phaseDotEl.className = `phase-dot ${phase.id}`;
     phaseNameEl.textContent = getLocalizedPhase(phase.id).name;
@@ -4679,6 +4713,77 @@ export function initLiquidSort(): () => void {
     return list[Math.floor(Math.random() * list.length)];
   }
 
+  function renderVictoryRewardsDisplay(victoryReward: RoundVictoryOutcome | null) {
+    const earnedStars = victoryReward?.stars ?? null;
+    const litCount = earnedStars ?? 0;
+
+    if (winStarsEl) {
+      const starEls = winStarsEl.querySelectorAll<SVGElement>('.win-star');
+      starEls.forEach((starEl, idx) => {
+        const isFilled = idx < litCount;
+        starEl.classList.toggle('filled', isFilled);
+        starEl.classList.toggle('empty', !isFilled);
+      });
+      winStarsEl.setAttribute(
+        'aria-label',
+        earnedStars !== null
+          ? t('winStarsAria', { stars: earnedStars })
+          : t('winStarsUnavailableAria')
+      );
+    }
+
+    if (winCoinsEarnedEl) {
+      if (victoryReward === null) {
+        winCoinsEarnedEl.textContent = '—';
+        winCoinsEarnedEl.className = 'win-rewards-value win-coins-earned is-unavailable';
+      } else {
+        const earned = victoryReward.coinsEarnedTotal;
+        winCoinsEarnedEl.textContent = earned > 0 ? `+${earned}` : '+0';
+        winCoinsEarnedEl.className =
+          'win-rewards-value win-coins-earned ' + (earned > 0 ? 'is-positive' : 'is-zero');
+      }
+    }
+
+    if (winCoinsBreakdownEl) {
+      winCoinsBreakdownEl.innerHTML = '';
+      if (victoryReward === null) {
+        winCoinsBreakdownEl.style.display = 'none';
+      } else if (victoryReward.coinsEarnedTotal > 0) {
+        const tags: string[] = [];
+        if (victoryReward.coinsRoundBase > 0) {
+          tags.push(t('winRewardBaseTag', { coins: victoryReward.coinsRoundBase }));
+        }
+        if (victoryReward.coinsStarBonus > 0) {
+          tags.push(t('winRewardStarsTag', { coins: victoryReward.coinsStarBonus }));
+        }
+        if (victoryReward.coinsPhaseBonus > 0) {
+          tags.push(t('winRewardPhaseTag', { coins: victoryReward.coinsPhaseBonus }));
+        }
+        if (victoryReward.coinsTrainingBonus > 0) {
+          tags.push(t('winRewardTrainingTag', { coins: victoryReward.coinsTrainingBonus }));
+        }
+        tags.forEach((label) => {
+          const tagEl = document.createElement('span');
+          tagEl.className = 'win-reward-tag';
+          tagEl.textContent = label;
+          winCoinsBreakdownEl.appendChild(tagEl);
+        });
+        winCoinsBreakdownEl.style.display = tags.length > 0 ? 'flex' : 'none';
+      } else {
+        const noteEl = document.createElement('span');
+        noteEl.className = 'win-reward-note';
+        noteEl.textContent = t('winRewardsAlreadyClaimed');
+        winCoinsBreakdownEl.appendChild(noteEl);
+        winCoinsBreakdownEl.style.display = 'flex';
+      }
+    }
+
+    if (winCoinsBalanceEl) {
+      const balance = victoryReward ? victoryReward.totalCoinsAfter : appState.rewards.coins;
+      winCoinsBalanceEl.textContent = String(balance);
+    }
+  }
+
   function showVictoryModal() {
     const phase = activePhaseDef();
     const pData = activePhaseData();
@@ -4699,6 +4804,7 @@ export function initLiquidSort(): () => void {
     winIdealMovesEl.textContent = String(board.idealMoves);
     winEffEl.textContent = displayEff;
     winEffEl.className = 'stat-value ' + getEfficiencyClass(rawEff);
+    renderVictoryRewardsDisplay(victoryReward);
 
     skipCalloutEl.classList.remove('visible');
     btnWinAdvance.style.display = 'none';
