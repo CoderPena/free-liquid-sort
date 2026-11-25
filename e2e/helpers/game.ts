@@ -1,9 +1,12 @@
 import { expect, type Page } from '@playwright/test';
 
+export type SettingsCategory = 'visual' | 'gameplay' | 'audio' | 'data';
+
 export const SELECTORS = {
   board: '#board',
   realTubes: '#board .tube:not(.tube-ghost)[data-index]',
   tubeByIndex: (index: number) => `#board .tube[data-index="${index}"]`,
+  tubeSegmentsByIndex: (index: number) => `#board .tube[data-index="${index}"] .liquid-segment`,
   phaseName: '#phase-name',
   roundNum: '#round-num',
   roundTotal: '#round-total',
@@ -12,6 +15,52 @@ export const SELECTORS = {
   movesNum: '#moves-num',
   idealMovesNum: '#ideal-moves-num',
   effNum: '#eff-num',
+  btnUndo: '#btn-undo',
+  btnHint: '#btn-hint',
+  btnRestart: '#btn-restart',
+  btnTheme: '#btn-theme',
+  btnSound: '#btn-sound',
+  iconSoundOn: '#icon-sound-on',
+  iconSoundOff: '#icon-sound-off',
+  btnLanguage: '#btn-language',
+  langCode: '#lang-code',
+  languageModal: '#language-modal',
+  languageItems: '#language-list .lang-item',
+  btnBgm: '#btn-bgm',
+  bgmEmoji: '#bgm-emoji',
+  bgmModal: '#bgm-modal',
+  bgmCards: '#bgm-list .bgm-card',
+  btnSettings: '#btn-settings',
+  settingsModal: '#settings-modal',
+  settingsTrack: '#settings-track',
+  settingsPaneMain: '#settings-pane-main',
+  settingsPaneSub: '#settings-pane-sub',
+  settingsCategoryBtn: (category: SettingsCategory) => `[data-settings-cat="${category}"]`,
+  settingsSubpanel: (category: SettingsCategory) => `.settings-subpanel[data-subpanel="${category}"]`,
+  btnSettingsBack: '#btn-settings-back',
+  btnCloseSettings: '#btn-close-settings',
+  visualModeCards: '#settings-list .setting-card',
+  btnThemeLight: '#btn-theme-light',
+  btnThemeDark: '#btn-theme-dark',
+  toggleMysteryMode: '#toggle-mystery-mode',
+  toggleMysteryModeLabel: 'label[for="toggle-mystery-mode"]',
+  sliderHintDuration: '#slider-hint-duration',
+  hintDurationValue: '#hint-duration-value',
+  sliderSfxVolume: '#slider-sfx-volume',
+  sfxVolumeValue: '#sfx-volume-value',
+  sliderBgmVolume: '#slider-bgm-volume',
+  bgmVolumeValue: '#bgm-volume-value',
+  btnResetAllProgress: '#btn-reset-all-progress',
+  resetConfirm1Modal: '#reset-confirm-1-modal',
+  btnResetNext1: '#btn-reset-next-1',
+  resetConfirm2Modal: '#reset-confirm-2-modal',
+  btnResetConfirm2: '#btn-reset-confirm-2',
+  confirmModal: '#confirm-modal',
+  btnCancelRestart: '#btn-cancel-restart',
+  btnConfirmRestart: '#btn-confirm-restart',
+  hintSourceTubes: '#board .tube.hint-source',
+  hintTargetTubes: '#board .tube.hint-target',
+  hintArrowPath: '#hint-svg .hint-arrow-path',
   victoryModal: '#victory-modal',
   victoryStarsFilled: '#win-stars .win-star.filled',
   victoryStarsEmpty: '#win-stars .win-star.empty',
@@ -111,4 +160,61 @@ export async function advanceFromVictoryModal(page: Page): Promise<void> {
   await expect(primaryBtn).toBeVisible();
   await primaryBtn.click();
   await expect(page.locator(SELECTORS.victoryModal)).not.toHaveClass(/\bopen\b/);
+}
+
+export async function openSettingsModal(page: Page): Promise<void> {
+  await page.locator(SELECTORS.btnSettings).click();
+  await expect(page.locator(SELECTORS.settingsModal)).toHaveClass(/\bopen\b/);
+  await expect(page.locator(SELECTORS.settingsPaneMain)).toHaveAttribute('aria-hidden', 'false');
+}
+
+export async function openSettingsCategory(
+  page: Page,
+  category: SettingsCategory
+): Promise<void> {
+  const settingsModal = page.locator(SELECTORS.settingsModal);
+  const isOpen = await settingsModal.evaluate((el) => el.classList.contains('open'));
+  if (!isOpen) {
+    await openSettingsModal(page);
+  }
+  await page.locator(SELECTORS.settingsCategoryBtn(category)).click();
+  await expect(page.locator(SELECTORS.settingsTrack)).toHaveClass(/\bin-submenu\b/);
+  await expect(page.locator(SELECTORS.settingsPaneSub)).toHaveAttribute('aria-hidden', 'false');
+  await expect(page.locator(SELECTORS.settingsSubpanel(category))).toHaveClass(/\bactive\b/);
+}
+
+export async function backToSettingsMain(page: Page): Promise<void> {
+  await page.locator(SELECTORS.btnSettingsBack).click();
+  await expect(page.locator(SELECTORS.settingsTrack)).not.toHaveClass(/\bin-submenu\b/);
+  await expect(page.locator(SELECTORS.settingsPaneMain)).toHaveAttribute('aria-hidden', 'false');
+}
+
+export async function closeSettingsModal(page: Page): Promise<void> {
+  await page.locator(SELECTORS.btnCloseSettings).click();
+  await expect(page.locator(SELECTORS.settingsModal)).not.toHaveClass(/\bopen\b/);
+}
+
+export async function setRangeSliderValue(
+  page: Page,
+  selector: string,
+  value: string
+): Promise<void> {
+  const slider = page.locator(selector);
+  await slider.fill(value);
+  await expect(slider).toHaveValue(value);
+}
+
+export async function triggerFullResetViaSettings(page: Page): Promise<void> {
+  await openSettingsCategory(page, 'data');
+
+  await page.locator(SELECTORS.btnResetAllProgress).click();
+  await expect(page.locator(SELECTORS.settingsModal)).not.toHaveClass(/\bopen\b/);
+  await expect(page.locator(SELECTORS.resetConfirm1Modal)).toHaveClass(/\bopen\b/);
+
+  await page.locator(SELECTORS.btnResetNext1).click();
+  await expect(page.locator(SELECTORS.resetConfirm1Modal)).not.toHaveClass(/\bopen\b/);
+  await expect(page.locator(SELECTORS.resetConfirm2Modal)).toHaveClass(/\bopen\b/);
+
+  await page.locator(SELECTORS.btnResetConfirm2).click();
+  await expect(page.locator(SELECTORS.resetConfirm2Modal)).not.toHaveClass(/\bopen\b/);
 }
