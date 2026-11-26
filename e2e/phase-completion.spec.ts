@@ -340,4 +340,67 @@ test.describe('Conclusão de Fases, Bônus e Replay', () => {
 
     expect(pageErrors).toEqual([]);
   });
+
+  test('Cenário G — Repetir a última rodada do Desafiador (16/16) via #btn-win-replay mantém a rodada 16 e não duplica bônus de fase', async ({
+    page,
+  }) => {
+    const pageErrors = trackPageErrors(page);
+
+    await prepareDesafiadorRound16PreBonusState(page);
+
+    await pourBetweenTubes(page, 10, 9);
+    await expectVictoryRewards(page, {
+      stars: 3,
+      earnedText: '+20',
+      balanceText: '170',
+    });
+    await expectHudRewards(page, 48, 170);
+
+    const primaryReplayPhaseBtn = page.locator(SELECTORS.btnWinPrimary);
+    const replayRoundBtn = page.locator(SELECTORS.btnWinReplay);
+    await expect(primaryReplayPhaseBtn).toBeVisible();
+    await expect(primaryReplayPhaseBtn).toHaveAttribute('data-action', 'replay-phase');
+    await expect(replayRoundBtn).toBeVisible();
+
+    await replayFromVictoryModal(page);
+
+    await expect(page.locator(SELECTORS.phaseDot)).toHaveClass(/\bdesafiador\b/);
+    await expect(page.locator(SELECTORS.roundNum)).toHaveText('16');
+    await expect(page.locator(SELECTORS.roundTotal)).toHaveText('16');
+    await expect(page.locator(SELECTORS.movesNum)).toHaveText('0');
+    await expectHudRewards(page, 48, 170);
+
+    const savedBeforeSecondWin = await readPersistedState(page);
+    expect(savedBeforeSecondWin.phases.desafiador.currentRound).toBe(16);
+    expect(savedBeforeSecondWin.phases.desafiador.completedRounds).toHaveLength(16);
+    expect(savedBeforeSecondWin.phases.desafiador.phaseCompleted).toBe(true);
+    expect(savedBeforeSecondWin.rewards.phaseCompletionPaid.desafiador).toBe(true);
+
+    await pourBetweenTubes(page, 10, 9);
+    await expectVictoryRewards(page, {
+      stars: 3,
+      earnedText: '+0',
+      balanceText: '170',
+    });
+    await expect(page.locator(SELECTORS.victoryRewardTags)).toHaveCount(0);
+    await expect(page.locator(SELECTORS.victoryRewardNote)).toBeVisible();
+    await expectHudRewards(page, 48, 170);
+
+    const savedAfterSecondWin = await readPersistedState(page);
+    expect(savedAfterSecondWin.rewards.coins).toBe(170);
+    expect(savedAfterSecondWin.rewards.phaseCompletionPaid.desafiador).toBe(true);
+    expect(savedAfterSecondWin.phases.desafiador.currentRound).toBe(16);
+    expect(savedAfterSecondWin.phases.desafiador.completedRounds).toHaveLength(16);
+    expect(savedAfterSecondWin.phases.desafiador.phaseCompleted).toBe(true);
+    expect(savedAfterSecondWin.phases.desafiador.board?.lastVictoryReward?.coinsPhaseBonus).toBe(0);
+    expect(savedAfterSecondWin.phases.desafiador.board?.lastVictoryReward?.coinsEarnedTotal).toBe(0);
+
+    // O botão primário de replay integral da fase continua funcionando normalmente
+    await primaryReplayPhaseBtn.click();
+    await expect(page.locator(SELECTORS.victoryModal)).not.toHaveClass(/\bopen\b/);
+    await expect(page.locator(SELECTORS.roundNum)).toHaveText('1');
+    await expectHudRewards(page, 48, 170);
+
+    expect(pageErrors).toEqual([]);
+  });
 });

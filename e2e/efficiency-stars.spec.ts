@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { I18N, LANGUAGE_ORDER } from '../src/i18n';
 import {
   completeTrainingLessons1To4,
   expectHudRewards,
@@ -15,6 +16,7 @@ import {
   EFFICIENCY_THREE_TIER_TUBES,
   prepareNormalRoundBoard,
   readPersistedState,
+  SAVE_STORAGE_KEY,
 } from './helpers/storage';
 
 const ONE_STAR_SIX_MOVES: ReadonlyArray<readonly [number, number]> = [
@@ -121,10 +123,16 @@ test.describe('Eficiência e Classificação de Estrelas', () => {
     await expect(page.locator(SELECTORS.victoryMoves)).toHaveText('6');
     await expect(page.locator(SELECTORS.victoryIdealMoves)).toHaveText('4');
     await expect(page.locator(SELECTORS.victoryEff)).toHaveText('66.6%');
+    await expect(page.locator(SELECTORS.btnWinReplay)).toBeVisible();
     await expectHudRewards(page, 1, 5);
+
+    let saved = await readPersistedState(page);
+    expect(saved.phases.facil.easyRounds).toEqual([]);
 
     // Replay e 2ª vitória: 5 movimentos (4/5 = 80.0% exato) -> 2 estrelas, +2 moedas incrementais
     await replayFromVictoryModal(page);
+    await expect(page.locator(SELECTORS.phaseDot)).toHaveClass(/\bfacil\b/);
+    await expect(page.locator(SELECTORS.roundNum)).toHaveText('1');
     await playMoveSequence(page, TWO_STARS_FIVE_MOVES);
     await expectVictoryRewards(page, {
       stars: 2,
@@ -135,8 +143,12 @@ test.describe('Eficiência e Classificação de Estrelas', () => {
     await expect(page.locator(SELECTORS.victoryEff)).toHaveText('80.0%');
     await expectHudRewards(page, 2, 7);
 
-    // Replay e 3ª vitória: 4 movimentos (4/4 = 100.0%) -> 3 estrelas, +3 moedas incrementais
+    saved = await readPersistedState(page);
+    expect(saved.phases.facil.easyRounds).toEqual([]);
+
+    // Replay e 3ª vitória: 4 movimentos (4/4 = 100.0%) -> 3 estrelas, +3 moedas incrementais e inclusão em easyRounds
     await replayFromVictoryModal(page);
+    await expect(page.locator(SELECTORS.roundNum)).toHaveText('1');
     await playMoveSequence(page, THREE_STARS_FOUR_MOVES);
     await expectVictoryRewards(page, {
       stars: 3,
@@ -147,8 +159,12 @@ test.describe('Eficiência e Classificação de Estrelas', () => {
     await expect(page.locator(SELECTORS.victoryEff)).toHaveText('100.0%');
     await expectHudRewards(page, 3, 10);
 
+    saved = await readPersistedState(page);
+    expect(saved.phases.facil.easyRounds).toEqual([1]);
+
     // Replay e 4ª vitória com desempenho inferior (1 estrela) -> sem novas moedas e sem regressão de recorde
     await replayFromVictoryModal(page);
+    await expect(page.locator(SELECTORS.roundNum)).toHaveText('1');
     await playMoveSequence(page, ONE_STAR_SIX_MOVES);
     await expectVictoryRewards(page, {
       stars: 1,
@@ -160,8 +176,11 @@ test.describe('Eficiência e Classificação de Estrelas', () => {
     await expect(page.locator(SELECTORS.victoryRewardNote)).toBeVisible();
     await expectHudRewards(page, 3, 10);
 
-    const saved = await readPersistedState(page);
+    saved = await readPersistedState(page);
     expect(saved.rewards.coins).toBe(10);
+    expect(saved.phases.facil.currentRound).toBe(1);
+    expect(saved.phases.facil.completedRounds).toEqual([1]);
+    expect(saved.phases.facil.easyRounds).toEqual([1]);
     expect(saved.rewards.rounds['facil:1']).toEqual({
       completed: true,
       bestStars: 3,
@@ -260,6 +279,55 @@ test.describe('Eficiência e Classificação de Estrelas', () => {
       coinTwoStarsPaid: true,
       coinThreeStarsPaid: false,
     });
+
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('Cenário E — Rótulo genérico e traduções de #btn-win-replay nas oito línguas em fase normal', async ({
+    page,
+  }) => {
+    const pageErrors = trackPageErrors(page);
+
+    expect(LANGUAGE_ORDER).toHaveLength(8);
+    for (const lang of LANGUAGE_ORDER) {
+      const label = I18N[lang].winBtnReplayRound;
+      expect(label.trim().length).toBeGreaterThan(0);
+      expect(label).not.toBe('Repetir Lição');
+      expect(label).not.toBe('Replay Lesson');
+      expect(label).not.toBe(I18N[lang].winReplayPhase);
+    }
+
+    await prepareNormalRoundBoard(page, {
+      phaseId: 'facil',
+      round: 1,
+      tubes: CLAMP_OVER_100_TUBES,
+      idealMoves: 1,
+    });
+
+    await pourBetweenTubes(page, 0, 1);
+    await expect(page.locator(SELECTORS.victoryModal)).toHaveClass(/\bopen\b/);
+
+    for (const lang of LANGUAGE_ORDER) {
+      await page.evaluate(
+        ({ storageKey, targetLang }) => {
+          const raw = window.localStorage.getItem(storageKey);
+          if (!raw) throw new Error('Missing persisted state');
+          const parsed = JSON.parse(raw);
+          parsed.language = targetLang;
+          window.localStorage.setItem(storageKey, JSON.stringify(parsed));
+        },
+        { storageKey: SAVE_STORAGE_KEY, targetLang: lang }
+      );
+
+      const reloadResponse = await page.reload();
+      expect(reloadResponse).not.toBeNull();
+      expect(reloadResponse?.ok()).toBe(true);
+
+      await expect(page.locator(SELECTORS.victoryModal)).toHaveClass(/\bopen\b/);
+      const replayBtn = page.locator(SELECTORS.btnWinReplay);
+      await expect(replayBtn).toBeVisible();
+      await expect(replayBtn).toHaveText(I18N[lang].winBtnReplayRound);
+    }
 
     expect(pageErrors).toEqual([]);
   });

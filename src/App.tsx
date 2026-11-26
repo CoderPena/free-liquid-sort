@@ -374,8 +374,8 @@ export default function App() {
             <button id="btn-win-advance" className="btn-advance" style={{ display: 'none' }}>
               Avançar para Fase Média (sem ônus)
             </button>
-            <button id="btn-win-replay" className="btn-secondary" data-i18n="winBtnReplayLesson" style={{ display: 'none' }}>
-              Repetir Lição
+            <button id="btn-win-replay" className="btn-secondary" data-i18n="winBtnReplayRound" style={{ display: 'none' }}>
+              Repetir Rodada
             </button>
             <button id="btn-win-phases" className="btn-secondary" data-i18n="winBtnChoosePhase" style={{ display: 'none' }}>
               Escolher Fase

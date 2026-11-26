@@ -4888,6 +4888,7 @@ export function initLiquidSort(): () => void {
       btnWinPhases.style.display = 'block';
     }
 
+    btnWinReplay.style.display = 'block';
     victoryModal.classList.add('open');
   }
 

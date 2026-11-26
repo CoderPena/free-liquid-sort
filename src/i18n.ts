@@ -150,7 +150,7 @@ export interface TranslationDict {
   winTutorialTitle: string;
   winTutorialSubtitle: string;
   winTutorialPrimaryNext: string;
-  winBtnReplayLesson: string;
+  winBtnReplayRound: string;
   winBtnChoosePhase: string;
   winGradEyebrow: string;
   winGradTitle: string;
@@ -296,7 +296,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: 'Lesson {round} Complete!',
     winTutorialSubtitle: 'Ready for the next lesson?',
     winTutorialPrimaryNext: 'Next Lesson',
-    winBtnReplayLesson: 'Replay Lesson',
+    winBtnReplayRound: 'Replay Round',
     winBtnChoosePhase: 'Choose Phase',
     winGradEyebrow: 'Graduation 🎓',
     winGradTitle: 'Training Complete!',
@@ -521,7 +521,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: 'Lição {round} concluída!',
     winTutorialSubtitle: 'Pronto para a próxima lição?',
     winTutorialPrimaryNext: 'Próxima Lição',
-    winBtnReplayLesson: 'Repetir Lição',
+    winBtnReplayRound: 'Repetir Rodada',
     winBtnChoosePhase: 'Escolher Fase',
     winGradEyebrow: 'Formatura 🎓',
     winGradTitle: 'Treinamento concluído!',
@@ -746,7 +746,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: '¡Lección {round} completada!',
     winTutorialSubtitle: '¿Listo para la siguiente lección?',
     winTutorialPrimaryNext: 'Siguiente Lección',
-    winBtnReplayLesson: 'Repetir Lección',
+    winBtnReplayRound: 'Repetir Ronda',
     winBtnChoosePhase: 'Elegir Fase',
     winGradEyebrow: 'Graduación 🎓',
     winGradTitle: '¡Entrenamiento completado!',
@@ -971,7 +971,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: '第 {round} 课完成！',
     winTutorialSubtitle: '准备好学习下一课了吗？',
     winTutorialPrimaryNext: '下一课',
-    winBtnReplayLesson: '重玩本课',
+    winBtnReplayRound: '重玩本关',
     winBtnChoosePhase: '选择阶段',
     winGradEyebrow: '毕业 🎓',
     winGradTitle: '训练完成！',
@@ -1196,7 +1196,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: 'पाठ {round} पूरा!',
     winTutorialSubtitle: 'अगले पाठ के लिए तैयार?',
     winTutorialPrimaryNext: 'अगला पाठ',
-    winBtnReplayLesson: 'पाठ दोहराएं',
+    winBtnReplayRound: 'राउंड दोहराएं',
     winBtnChoosePhase: 'चरण चुनें',
     winGradEyebrow: 'प्रशिक्षण पूर्ण 🎓',
     winGradTitle: 'प्रशिक्षण समाप्त!',
@@ -1421,7 +1421,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: 'اكتمل الدرس {round}!',
     winTutorialSubtitle: 'هل أنت مستعد للدرس التالي؟',
     winTutorialPrimaryNext: 'الدرس التالي',
-    winBtnReplayLesson: 'إعادة الدرس',
+    winBtnReplayRound: 'إعادة الجولة',
     winBtnChoosePhase: 'اختر المرحلة',
     winGradEyebrow: 'التخرج 🎓',
     winGradTitle: 'اكتمل التدريب!',
@@ -1646,7 +1646,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: 'Leçon {round} terminée !',
     winTutorialSubtitle: 'Prêt pour la leçon suivante ?',
     winTutorialPrimaryNext: 'Leçon suivante',
-    winBtnReplayLesson: 'Rejouer la leçon',
+    winBtnReplayRound: 'Rejouer la manche',
     winBtnChoosePhase: 'Choisir une phase',
     winGradEyebrow: 'Diplôme 🎓',
     winGradTitle: 'Entraînement terminé !',
@@ -1871,7 +1871,7 @@ export const I18N: Record<LangCode, TranslationDict> = {
     winTutorialTitle: 'Урок {round} завершён!',
     winTutorialSubtitle: 'Готовы к следующему уроку?',
     winTutorialPrimaryNext: 'Следующий урок',
-    winBtnReplayLesson: 'Повторить урок',
+    winBtnReplayRound: 'Повторить раунд',
     winBtnChoosePhase: 'Выбрать этап',
     winGradEyebrow: 'Выпуск 🎓',
     winGradTitle: 'Обучение завершено!',
