@@ -286,3 +286,157 @@ export async function prepareDesafiadorRound16PreBonusState(page: Page): Promise
   await expect(page.locator(SELECTORS.hudCoinsVal)).toHaveText('150');
   await expect(page.locator(SELECTORS.realTubes)).toHaveCount(DESAFIADOR_ROUND_16_TUBES.length);
 }
+
+export async function prepareFacilEasyAdvanceReadyState(page: Page): Promise<void> {
+  await gotoFreshGame(page);
+
+  await page.evaluate(
+    ({ storageKey, tubes }) => {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) {
+        throw new Error(`Missing initial persisted state at ${storageKey}`);
+      }
+      const state = JSON.parse(raw) as PersistedAppState;
+      const zeroHidden = new Array(tubes.length).fill(0);
+      const clone = (src: number[][]) => src.map((tube) => tube.slice());
+
+      state.activePhaseId = 'facil';
+      state.mysteryModeEnabled = false;
+      state.phases.facil = {
+        currentRound: 3,
+        completedRounds: [1, 2],
+        easyRounds: [1, 2],
+        phaseCompleted: false,
+        seed: state.phases.facil?.seed || 123456789,
+        board: {
+          round: 3,
+          tubes: clone(tubes),
+          initialTubes: clone(tubes),
+          hiddenCounts: [...zeroHidden],
+          initialHiddenCounts: [...zeroHidden],
+          history: [],
+          moves: 0,
+          idealMoves: 4,
+          baseIdealMoves: 4,
+          extraTubeUsed: false,
+          rewardProcessed: false,
+          lastVictoryReward: null,
+        },
+      };
+
+      state.rewards = {
+        coins: 20,
+        rounds: {
+          'facil:1': {
+            completed: true,
+            bestStars: 3,
+            bestEfficiency: 100,
+            coinBasePaid: true,
+            coinTwoStarsPaid: true,
+            coinThreeStarsPaid: true,
+          },
+          'facil:2': {
+            completed: true,
+            bestStars: 3,
+            bestEfficiency: 100,
+            coinBasePaid: true,
+            coinTwoStarsPaid: true,
+            coinThreeStarsPaid: true,
+          },
+        },
+        phaseCompletionPaid: {},
+      };
+
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+    },
+    { storageKey: SAVE_STORAGE_KEY, tubes: EFFICIENCY_THREE_TIER_TUBES }
+  );
+
+  const reloadResponse = await page.reload();
+  expect(reloadResponse).not.toBeNull();
+  expect(reloadResponse?.ok()).toBe(true);
+  await expect(page.locator(SELECTORS.board)).toBeVisible();
+  await expect(page.locator(SELECTORS.phaseDot)).toHaveClass(/\bfacil\b/);
+  await expect(page.locator(SELECTORS.roundNum)).toHaveText('3');
+  await expect(page.locator(SELECTORS.roundTotal)).toHaveText('8');
+  await expect(page.locator(SELECTORS.movesNum)).toHaveText('0');
+  await expect(page.locator(SELECTORS.idealMovesNum)).toHaveText('4');
+  await expect(page.locator(SELECTORS.hudStarsVal)).toHaveText('6');
+  await expect(page.locator(SELECTORS.hudCoinsVal)).toHaveText('20');
+  await expect(page.locator(SELECTORS.realTubes)).toHaveCount(EFFICIENCY_THREE_TIER_TUBES.length);
+}
+
+export async function prepareFacilRound8PreBonusState(page: Page): Promise<void> {
+  await gotoFreshGame(page);
+
+  await page.evaluate(
+    ({ storageKey, tubes }) => {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) {
+        throw new Error(`Missing initial persisted state at ${storageKey}`);
+      }
+      const state = JSON.parse(raw) as PersistedAppState;
+      const completed1To7 = Array.from({ length: 7 }, (_, idx) => idx + 1);
+      const zeroHidden = new Array(tubes.length).fill(0);
+      const clone = (src: number[][]) => src.map((tube) => tube.slice());
+
+      state.activePhaseId = 'facil';
+      state.mysteryModeEnabled = false;
+      state.phases.facil = {
+        currentRound: 8,
+        completedRounds: [...completed1To7],
+        easyRounds: [...completed1To7],
+        phaseCompleted: false,
+        seed: state.phases.facil?.seed || 123456789,
+        board: {
+          round: 8,
+          tubes: clone(tubes),
+          initialTubes: clone(tubes),
+          hiddenCounts: [...zeroHidden],
+          initialHiddenCounts: [...zeroHidden],
+          history: [],
+          moves: 0,
+          idealMoves: 1,
+          baseIdealMoves: 1,
+          extraTubeUsed: false,
+          rewardProcessed: false,
+          lastVictoryReward: null,
+        },
+      };
+
+      const roundRewards: Record<string, PersistedRoundRewardRecord> = {};
+      for (let r = 1; r <= 7; r++) {
+        roundRewards[`facil:${r}`] = {
+          completed: true,
+          bestStars: 3,
+          bestEfficiency: 100,
+          coinBasePaid: true,
+          coinTwoStarsPaid: true,
+          coinThreeStarsPaid: true,
+        };
+      }
+
+      state.rewards = {
+        coins: 70,
+        rounds: roundRewards,
+        phaseCompletionPaid: {},
+      };
+
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+    },
+    { storageKey: SAVE_STORAGE_KEY, tubes: CLAMP_OVER_100_TUBES }
+  );
+
+  const reloadResponse = await page.reload();
+  expect(reloadResponse).not.toBeNull();
+  expect(reloadResponse?.ok()).toBe(true);
+  await expect(page.locator(SELECTORS.board)).toBeVisible();
+  await expect(page.locator(SELECTORS.phaseDot)).toHaveClass(/\bfacil\b/);
+  await expect(page.locator(SELECTORS.roundNum)).toHaveText('8');
+  await expect(page.locator(SELECTORS.roundTotal)).toHaveText('8');
+  await expect(page.locator(SELECTORS.movesNum)).toHaveText('0');
+  await expect(page.locator(SELECTORS.idealMovesNum)).toHaveText('1');
+  await expect(page.locator(SELECTORS.hudStarsVal)).toHaveText('21');
+  await expect(page.locator(SELECTORS.hudCoinsVal)).toHaveText('70');
+  await expect(page.locator(SELECTORS.realTubes)).toHaveCount(CLAMP_OVER_100_TUBES.length);
+}
