@@ -102,6 +102,116 @@ export async function readPersistedState(page: Page): Promise<PersistedAppState>
   return JSON.parse(raw!) as PersistedAppState;
 }
 
+export const EFFICIENCY_THREE_TIER_TUBES: number[][] = [
+  [0, 1, 0, 0],
+  [1, 1, 1, 0],
+  [2, 2, 2, 2],
+  [],
+  [],
+];
+
+export const CLAMP_OVER_100_TUBES: number[][] = [
+  [0, 0],
+  [0, 0],
+  [],
+];
+
+export const EXTRA_TUBE_REDUCE_TUBES: number[][] = [
+  [1, 1, 2, 0],
+  [1, 1, 2, 0],
+  [0, 2, 2, 0],
+  [],
+];
+
+export const EXTRA_TUBE_DEADLOCK_TUBES: number[][] = [
+  [0, 2, 0, 1],
+  [0, 1, 2, 1],
+  [1, 2, 2, 0],
+  [],
+];
+
+export interface PrepareNormalRoundBoardOptions {
+  phaseId?: 'facil' | 'medio' | 'dificil' | 'desafiador';
+  round?: number;
+  tubes: number[][];
+  idealMoves: number;
+  baseIdealMoves?: number;
+}
+
+export async function prepareNormalRoundBoard(
+  page: Page,
+  options: PrepareNormalRoundBoardOptions
+): Promise<void> {
+  const phaseId = options.phaseId ?? 'facil';
+  const round = options.round ?? 1;
+  const baseIdealMoves = options.baseIdealMoves ?? options.idealMoves;
+
+  await gotoFreshGame(page);
+
+  await page.evaluate(
+    ({ storageKey, targetPhaseId, targetRound, tubes, idealMoves, baseIdeal }) => {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) {
+        throw new Error(`Missing initial persisted state at ${storageKey}`);
+      }
+      const state = JSON.parse(raw) as PersistedAppState;
+      const zeroHidden = new Array(tubes.length).fill(0);
+      const clone = (src: number[][]) => src.map((tube) => tube.slice());
+
+      state.activePhaseId = targetPhaseId;
+      state.mysteryModeEnabled = false;
+      state.phases[targetPhaseId] = {
+        currentRound: targetRound,
+        completedRounds: [],
+        easyRounds: [],
+        phaseCompleted: false,
+        seed: state.phases[targetPhaseId]?.seed || 123456789,
+        board: {
+          round: targetRound,
+          tubes: clone(tubes),
+          initialTubes: clone(tubes),
+          hiddenCounts: [...zeroHidden],
+          initialHiddenCounts: [...zeroHidden],
+          history: [],
+          moves: 0,
+          idealMoves,
+          baseIdealMoves: baseIdeal,
+          extraTubeUsed: false,
+          rewardProcessed: false,
+          lastVictoryReward: null,
+        },
+      };
+      state.rewards = {
+        coins: 0,
+        rounds: {},
+        phaseCompletionPaid: {},
+      };
+
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+    },
+    {
+      storageKey: SAVE_STORAGE_KEY,
+      targetPhaseId: phaseId,
+      targetRound: round,
+      tubes: options.tubes,
+      idealMoves: options.idealMoves,
+      baseIdeal: baseIdealMoves,
+    }
+  );
+
+  const reloadResponse = await page.reload();
+  expect(reloadResponse).not.toBeNull();
+  expect(reloadResponse?.ok()).toBe(true);
+  await expect(page.locator(SELECTORS.board)).toBeVisible();
+  await expect(page.locator(SELECTORS.phaseDot)).toHaveClass(new RegExp(`\\b${phaseId}\\b`));
+  await expect(page.locator(SELECTORS.roundNum)).toHaveText(String(round));
+  await expect(page.locator(SELECTORS.movesNum)).toHaveText('0');
+  await expect(page.locator(SELECTORS.idealMovesNum)).toHaveText(String(options.idealMoves));
+  await expect(page.locator(SELECTORS.hudStarsVal)).toHaveText('0');
+  await expect(page.locator(SELECTORS.hudCoinsVal)).toHaveText('0');
+  await expect(page.locator(SELECTORS.realTubes)).toHaveCount(options.tubes.length);
+}
+
 export async function prepareDesafiadorRound16PreBonusState(page: Page): Promise<void> {
   await gotoFreshGame(page);
 

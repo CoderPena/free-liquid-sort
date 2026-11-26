@@ -24,6 +24,10 @@ export const SELECTORS = {
   btnUndo: '#btn-undo',
   btnHint: '#btn-hint',
   btnRestart: '#btn-restart',
+  btnExtra: '#btn-extra',
+  extraBadge: '#extra-badge',
+  ghostTube: '#board .tube.tube-ghost',
+  deadlockBanner: '#deadlock-banner',
   btnTheme: '#btn-theme',
   btnSound: '#btn-sound',
   iconSoundOn: '#icon-sound-on',
@@ -64,10 +68,15 @@ export const SELECTORS = {
   confirmModal: '#confirm-modal',
   btnCancelRestart: '#btn-cancel-restart',
   btnConfirmRestart: '#btn-confirm-restart',
+  stuckModal: '#stuck-modal',
+  btnStuckUndo: '#btn-stuck-undo',
+  btnStuckExtra: '#btn-stuck-extra',
+  btnStuckRestart: '#btn-stuck-restart',
   hintSourceTubes: '#board .tube.hint-source',
   hintTargetTubes: '#board .tube.hint-target',
   hintArrowPath: '#hint-svg .hint-arrow-path',
   victoryModal: '#victory-modal',
+  winTitle: '#win-title',
   victoryStarsFilled: '#win-stars .win-star.filled',
   victoryStarsEmpty: '#win-stars .win-star.empty',
   victoryCoinsEarned: '#win-coins-earned',
@@ -124,6 +133,15 @@ export async function pourBetweenTubes(
   await toTube.click();
   await expect(board).toHaveClass(/\bis-pouring\b/);
   await expect(board).not.toHaveClass(/\bis-pouring\b/);
+}
+
+export async function playMoveSequence(
+  page: Page,
+  moves: ReadonlyArray<readonly [number, number]>
+): Promise<void> {
+  for (const [fromIndex, toIndex] of moves) {
+    await pourBetweenTubes(page, fromIndex, toIndex);
+  }
 }
 
 export async function completeTrainingLesson1(page: Page): Promise<void> {
