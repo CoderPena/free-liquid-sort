@@ -7,9 +7,15 @@ export const SELECTORS = {
   realTubes: '#board .tube:not(.tube-ghost)[data-index]',
   tubeByIndex: (index: number) => `#board .tube[data-index="${index}"]`,
   tubeSegmentsByIndex: (index: number) => `#board .tube[data-index="${index}"] .liquid-segment`,
+  phaseDot: '#phase-dot',
   phaseName: '#phase-name',
   roundNum: '#round-num',
   roundTotal: '#round-total',
+  btnPhases: '#btn-phases',
+  phasesModal: '#phases-modal',
+  phaseCards: '#phase-list .phase-card',
+  phaseCardById: (phaseId: string) => `#phase-list .phase-card:has(.phase-dot.${phaseId})`,
+  btnClosePhases: '#btn-close-phases',
   hudStarsVal: '#hud-stars-val',
   hudCoinsVal: '#hud-coins-val',
   movesNum: '#moves-num',
@@ -66,12 +72,14 @@ export const SELECTORS = {
   victoryStarsEmpty: '#win-stars .win-star.empty',
   victoryCoinsEarned: '#win-coins-earned',
   victoryCoinsBalance: '#win-coins-balance',
+  victoryRewardTags: '#win-coins-breakdown .win-reward-tag',
   victoryRewardNote: '#win-coins-breakdown .win-reward-note',
   victoryMoves: '#win-moves',
   victoryIdealMoves: '#win-ideal-moves',
   victoryEff: '#win-eff',
   btnWinPrimary: '#btn-win-primary',
   btnWinReplay: '#btn-win-replay',
+  btnWinPhases: '#btn-win-phases',
 } as const;
 
 export function trackPageErrors(page: Page): Error[] {
@@ -123,6 +131,58 @@ export async function completeTrainingLesson1(page: Page): Promise<void> {
   await expect(page.locator(SELECTORS.victoryModal)).toHaveClass(/\bopen\b/);
 }
 
+export async function completeTrainingLesson2(page: Page): Promise<void> {
+  await pourBetweenTubes(page, 0, 2);
+  await pourBetweenTubes(page, 1, 0);
+  await pourBetweenTubes(page, 1, 2);
+  await expect(page.locator(SELECTORS.victoryModal)).toHaveClass(/\bopen\b/);
+}
+
+export async function completeTrainingLesson3(page: Page): Promise<void> {
+  await pourBetweenTubes(page, 1, 0);
+  await pourBetweenTubes(page, 1, 2);
+  await expect(page.locator(SELECTORS.victoryModal)).toHaveClass(/\bopen\b/);
+}
+
+export async function completeTrainingLesson4(page: Page): Promise<void> {
+  await pourBetweenTubes(page, 0, 2);
+  await pourBetweenTubes(page, 1, 0);
+  await pourBetweenTubes(page, 1, 2);
+  await expect(page.locator(SELECTORS.victoryModal)).toHaveClass(/\bopen\b/);
+}
+
+export async function completeTrainingLesson5(page: Page): Promise<void> {
+  await pourBetweenTubes(page, 0, 3);
+  await pourBetweenTubes(page, 2, 0);
+  await pourBetweenTubes(page, 1, 2);
+  await pourBetweenTubes(page, 1, 3);
+  await expect(page.locator(SELECTORS.victoryModal)).toHaveClass(/\bopen\b/);
+}
+
+export async function completeTrainingLessons1To4(page: Page): Promise<void> {
+  await expectTrainingLesson1InitialState(page);
+  await completeTrainingLesson1(page);
+  await advanceFromVictoryModal(page);
+  await expect(page.locator(SELECTORS.roundNum)).toHaveText('2');
+
+  await completeTrainingLesson2(page);
+  await advanceFromVictoryModal(page);
+  await expect(page.locator(SELECTORS.roundNum)).toHaveText('3');
+
+  await completeTrainingLesson3(page);
+  await advanceFromVictoryModal(page);
+  await expect(page.locator(SELECTORS.roundNum)).toHaveText('4');
+
+  await completeTrainingLesson4(page);
+  await advanceFromVictoryModal(page);
+  await expect(page.locator(SELECTORS.roundNum)).toHaveText('5');
+}
+
+export async function completeTrainingLessons1To5(page: Page): Promise<void> {
+  await completeTrainingLessons1To4(page);
+  await completeTrainingLesson5(page);
+}
+
 export async function expectHudRewards(
   page: Page,
   stars: number,
@@ -160,6 +220,16 @@ export async function advanceFromVictoryModal(page: Page): Promise<void> {
   await expect(primaryBtn).toBeVisible();
   await primaryBtn.click();
   await expect(page.locator(SELECTORS.victoryModal)).not.toHaveClass(/\bopen\b/);
+}
+
+export async function openPhasesModal(page: Page): Promise<void> {
+  await page.locator(SELECTORS.btnPhases).click();
+  await expect(page.locator(SELECTORS.phasesModal)).toHaveClass(/\bopen\b/);
+}
+
+export async function closePhasesModal(page: Page): Promise<void> {
+  await page.locator(SELECTORS.btnClosePhases).click();
+  await expect(page.locator(SELECTORS.phasesModal)).not.toHaveClass(/\bopen\b/);
 }
 
 export async function openSettingsModal(page: Page): Promise<void> {
